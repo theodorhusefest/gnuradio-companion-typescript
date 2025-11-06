@@ -26,3 +26,4 @@ dist-ssr
 
 # AI tools
 .claude
+.mcp.json
