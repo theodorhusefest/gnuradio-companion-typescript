@@ -97,7 +97,6 @@ function ReactFlowContent() {
         onDrop={onDrop}
         onDragOver={onDragOver}
         fitViewOptions={fitViewOptions}
-        fitView
       >
         <Background />
         <Controls />
