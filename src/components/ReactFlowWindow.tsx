@@ -87,13 +87,15 @@ function ReactFlowContent() {
       });
 
       // Create new node
+      const nodeIdValue = getNodeId();
       const newNode: Node = {
-        id: getNodeId(),
+        id: nodeIdValue,
         type: "gnuradioBlock",
         position,
         data: {
           label: block.label,
           block: block,
+          nodeId: nodeIdValue,
         },
       };
 
