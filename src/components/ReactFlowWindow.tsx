@@ -1,47 +1,37 @@
+import type { GnuRadioBlock } from "@/blocks/types";
 import {
+  addEdge,
   applyEdgeChanges,
   applyNodeChanges,
   Background,
   Controls,
   ReactFlow,
-  type OnNodesChange,
-  type OnEdgesChange,
-  type OnConnect,
-  addEdge,
+  ReactFlowProvider,
+  useReactFlow,
+  type Edge,
   type FitViewOptions,
   type Node,
-  type Edge,
+  type OnConnect,
+  type OnEdgesChange,
+  type OnNodesChange,
 } from "@xyflow/react";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState, type DragEvent } from "react";
 
-const initialNodes: Node[] = [
-  {
-    id: "n1",
-    position: { x: 0, y: 0 },
-    data: { label: "Node 1" },
-    type: "input",
-  },
-  {
-    id: "n2",
-    position: { x: 100, y: 100 },
-    data: { label: "Node 2" },
-  },
-];
-const initialEdges: Edge[] = [
-  {
-    id: "n1-n2",
-    source: "n1",
-    target: "n2",
-  },
-];
+const initialNodes: Node[] = [];
+const initialEdges: Edge[] = [];
 
 const fitViewOptions: FitViewOptions = {
   padding: 0.2,
 };
 
-export function ReactFlowWindow() {
+let nodeId = 0;
+const getNodeId = () => `node_${nodeId++}`;
+
+function ReactFlowContent() {
   const [nodes, setNodes] = useState(initialNodes);
   const [edges, setEdges] = useState(initialEdges);
+  const reactFlowWrapper = useRef<HTMLDivElement>(null);
+  const { screenToFlowPosition } = useReactFlow();
 
   const onNodesChange: OnNodesChange = useCallback(
     (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -57,17 +47,68 @@ export function ReactFlowWindow() {
     [setEdges]
   );
 
+  const onDragOver = useCallback((event: DragEvent) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "copy";
+  }, []);
+
+  const onDrop = useCallback(
+    (event: DragEvent) => {
+      event.preventDefault();
+
+      // Get the block data from the drag event
+      const blockData = event.dataTransfer.getData(
+        "application/gnuradio-block"
+      );
+      if (!blockData) return;
+
+      const block: GnuRadioBlock = JSON.parse(blockData);
+
+      // Calculate position on the canvas
+      const position = screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+
+      // Create new node
+      const newNode: Node = {
+        id: getNodeId(),
+        type: "default",
+        position,
+        data: {
+          label: block.label,
+          block: block,
+        },
+      };
+
+      setNodes((nds) => nds.concat(newNode));
+    },
+    [screenToFlowPosition]
+  );
+
   return (
-    <ReactFlow
-      nodes={nodes}
-      edges={edges}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      onConnect={onConnect}
-      fitViewOptions={fitViewOptions}
-    >
-      <Background />
-      <Controls />
-    </ReactFlow>
+    <div ref={reactFlowWrapper} className="h-full w-full">
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        onDrop={onDrop}
+        onDragOver={onDragOver}
+        fitViewOptions={fitViewOptions}
+      >
+        <Background />
+        <Controls />
+      </ReactFlow>
+    </div>
+  );
+}
+
+export function ReactFlowWindow() {
+  return (
+    <ReactFlowProvider>
+      <ReactFlowContent />
+    </ReactFlowProvider>
   );
 }

@@ -1,12 +1,12 @@
-import {
-  ResizablePanelGroup,
-  ResizablePanel,
-  ResizableHandle,
-} from "@/components/ui/resizable";
-import { Toolbar } from "@/components/Toolbar";
-import { ReactFlowWindow } from "@/components/ReactFlowWindow";
-import { DetailsWindow } from "@/components/DetailsWindow";
 import { BlocksWindow } from "@/components/BlocksWindow";
+import { DetailsWindow } from "@/components/DetailsWindow";
+import { ReactFlowWindow } from "@/components/ReactFlowWindow";
+import { Toolbar } from "@/components/Toolbar";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 
 function App() {
   return (
