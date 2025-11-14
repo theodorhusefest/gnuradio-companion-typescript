@@ -27,3 +27,7 @@ dist-ssr
 # AI tools
 .claude
 .mcp.json
+
+# Generated GNU Radio blocks (can be regenerated with npm run parse-blocks)
+src/blocks/blocks.json
+src/blocks/types.ts
