@@ -5,6 +5,7 @@ import {
   applyNodeChanges,
   Background,
   Controls,
+  MarkerType,
   ReactFlow,
   ReactFlowProvider,
   useReactFlow,
@@ -16,6 +17,7 @@ import {
   type OnNodesChange,
 } from "@xyflow/react";
 import { useCallback, useRef, useState, type DragEvent } from "react";
+import BlockNode from "./ui/blocks/BlockNode";
 
 const initialNodes: Node[] = [];
 const initialEdges: Edge[] = [];
@@ -26,6 +28,20 @@ const fitViewOptions: FitViewOptions = {
 
 let nodeId = 0;
 const getNodeId = () => `node_${nodeId++}`;
+
+const nodeTypes = {
+  gnuradioBlock: BlockNode,
+};
+
+const defaultEdgeOptions = {
+  markerEnd: { type: MarkerType.ArrowClosed, color: "#000" },
+  style: { strokeWidth: 3, stroke: "#000" },
+};
+
+const connectionLineStyle = {
+  strokeWidth: 3,
+  stroke: "#000",
+};
 
 function ReactFlowContent() {
   const [nodes, setNodes] = useState(initialNodes);
@@ -71,13 +87,15 @@ function ReactFlowContent() {
       });
 
       // Create new node
+      const nodeIdValue = getNodeId();
       const newNode: Node = {
-        id: getNodeId(),
-        type: "default",
+        id: nodeIdValue,
+        type: "gnuradioBlock",
         position,
         data: {
           label: block.label,
           block: block,
+          nodeId: nodeIdValue,
         },
       };
 
@@ -91,6 +109,9 @@ function ReactFlowContent() {
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        nodeTypes={nodeTypes}
+        defaultEdgeOptions={defaultEdgeOptions}
+        connectionLineStyle={connectionLineStyle}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
