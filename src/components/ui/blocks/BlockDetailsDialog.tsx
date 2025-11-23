@@ -70,7 +70,7 @@ const BlockDetailsDialog = ({
                 <select
                   id={`${nodeId}-${param.id}`}
                   name={param.id}
-                  defaultValue={param.default}
+                  defaultValue={param.default?.toString()}
                   className="w-full px-3 py-2 border rounded"
                 >
                   {param.options.map((option, idx) => (
@@ -84,7 +84,7 @@ const BlockDetailsDialog = ({
                   type="number"
                   id={`${nodeId}-${param.id}`}
                   name={param.id}
-                  defaultValue={param.default}
+                  defaultValue={param.default?.toString()}
                   step={param.dtype === "float" ? "any" : "1"}
                   className="w-full px-3 py-2 border rounded"
                 />
@@ -93,7 +93,7 @@ const BlockDetailsDialog = ({
                   type="text"
                   id={`${nodeId}-${param.id}`}
                   name={param.id}
-                  defaultValue={param.default}
+                  defaultValue={param.default?.toString()}
                   className="w-full px-3 py-2 border rounded"
                 />
               )}
