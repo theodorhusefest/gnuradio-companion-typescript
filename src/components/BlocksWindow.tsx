@@ -12,13 +12,17 @@ import blocksData from "@/blocks/blocks.json";
 
 const blocks = blocksData as BlocksData;
 
-interface CategoryBlocksProps {
+type CategoryBlocksProps = {
   category: string;
   categoryBlocks: GnuRadioBlock[];
   searchQuery: string;
-}
+};
 
-function CategoryBlocks({ category, categoryBlocks, searchQuery }: CategoryBlocksProps) {
+function CategoryBlocks({
+  category,
+  categoryBlocks,
+  searchQuery,
+}: CategoryBlocksProps) {
   const filteredBlocks = useMemo(() => {
     if (!searchQuery) return categoryBlocks;
 
@@ -64,7 +68,10 @@ function CategoryBlocks({ category, categoryBlocks, searchQuery }: CategoryBlock
             className="px-4 py-2 hover:bg-accent cursor-pointer transition-colors border-l-2 border-transparent hover:border-primary"
             draggable
             onDragStart={(e) => {
-              e.dataTransfer.setData("application/gnuradio-block", JSON.stringify(block));
+              e.dataTransfer.setData(
+                "application/gnuradio-block",
+                JSON.stringify(block)
+              );
               e.dataTransfer.effectAllowed = "copy";
             }}
           >
@@ -86,17 +93,19 @@ export function BlocksWindow() {
     const query = searchQuery.toLowerCase();
     const filtered: Record<string, GnuRadioBlock[]> = {};
 
-    Object.entries(blocks.blocksByCategory).forEach(([category, categoryBlocks]) => {
-      const matchingBlocks = categoryBlocks.filter(
-        (block) =>
-          block.label.toLowerCase().includes(query) ||
-          block.id.toLowerCase().includes(query)
-      );
+    Object.entries(blocks.blocksByCategory).forEach(
+      ([category, categoryBlocks]) => {
+        const matchingBlocks = categoryBlocks.filter(
+          (block) =>
+            block.label.toLowerCase().includes(query) ||
+            block.id.toLowerCase().includes(query)
+        );
 
-      if (matchingBlocks.length > 0) {
-        filtered[category] = matchingBlocks;
+        if (matchingBlocks.length > 0) {
+          filtered[category] = matchingBlocks;
+        }
       }
-    });
+    );
 
     return filtered;
   }, [searchQuery]);

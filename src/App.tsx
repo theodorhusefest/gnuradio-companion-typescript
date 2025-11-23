@@ -7,8 +7,48 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { useEffect } from "react";
+import { useTemporalActions } from "@/stores/useTemporalStore";
 
 function App() {
+  const { undo, redo } = useTemporalActions();
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Check for Cmd (Mac) or Ctrl (Windows/Linux)
+      const isModifier = event.metaKey || event.ctrlKey;
+
+      if (!isModifier) return;
+
+      // Undo: Cmd/Ctrl + Z (without Shift)
+      if (event.key === "z" && !event.shiftKey) {
+        event.preventDefault();
+        undo();
+        console.log("Undo triggered");
+      }
+
+      // Redo: Cmd/Ctrl + Shift + Z
+      if (event.key === "z" && event.shiftKey) {
+        event.preventDefault();
+        redo();
+        console.log("Redo triggered");
+      }
+
+      // Alternative Redo: Cmd/Ctrl + Y
+      if (event.key === "y") {
+        event.preventDefault();
+        redo();
+        console.log("Redo triggered (Ctrl+Y)");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [undo, redo]);
   return (
     <div className="h-screen w-screen flex flex-col">
       <Toolbar />
