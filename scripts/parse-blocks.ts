@@ -21,7 +21,7 @@ const OUTPUT_JSON = path.join(OUTPUT_DIR, 'blocks.json');
 const OUTPUT_TYPES = path.join(OUTPUT_DIR, 'types.ts');
 
 // Types for parsed blocks
-interface BlockParameter {
+export interface BlockParameter {
   id: string;
   label: string;
   dtype: string;
@@ -32,7 +32,7 @@ interface BlockParameter {
   hide?: string;
 }
 
-interface BlockPort {
+export interface BlockPort {
   domain: string;
   dtype: string;
   vlen?: number | string;
@@ -40,13 +40,13 @@ interface BlockPort {
   optional?: boolean;
 }
 
-interface BlockTemplates {
+export interface BlockTemplates {
   imports?: string;
   make?: string;
   callbacks?: string[];
 }
 
-interface ParsedBlock {
+export interface ParsedBlock {
   id: string;
   label: string;
   category?: string;
@@ -67,7 +67,7 @@ interface BlocksByCategory {
 /**
  * Recursively find all .block.yml files in a directory
  */
-function findBlockFiles(dir: string): string[] {
+export function findBlockFiles(dir: string): string[] {
   const blockFiles: string[] = [];
 
   if (!fs.existsSync(dir)) {
@@ -94,7 +94,7 @@ function findBlockFiles(dir: string): string[] {
 /**
  * Parse a single block YAML file
  */
-function parseBlockFile(filePath: string): ParsedBlock | null {
+export function parseBlockFile(filePath: string): ParsedBlock | null {
   try {
     const content = fs.readFileSync(filePath, 'utf8');
     const data = yaml.load(content) as ParsedBlock;
@@ -114,7 +114,7 @@ function parseBlockFile(filePath: string): ParsedBlock | null {
 /**
  * Extract category from block data or derive from ID
  */
-function getBlockCategory(block: ParsedBlock): string {
+export function getBlockCategory(block: ParsedBlock): string {
   if (block.category) {
     // Remove special category prefixes like '[Core]/'
     return block.category.replace(/^\[.*?\]\//, '');
