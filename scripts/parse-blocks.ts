@@ -6,63 +6,24 @@
  * to generate TypeScript types and a blocks.json file for the application.
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import * as yaml from 'js-yaml';
+import * as fs from "fs";
+import * as yaml from "js-yaml";
+import * as path from "path";
+import type {
+  BlocksByCategory,
+  BlocksData,
+  GnuRadioBlock,
+} from "../src/types/blocks.js";
 
 // Configuration
 const BLOCK_PATHS = [
-  '/opt/homebrew/share/gnuradio/grc/blocks',
-  path.join(process.env.HOME || '', '.local/state/gnuradio'),
+  "/opt/homebrew/share/gnuradio/grc/blocks",
+  path.join(process.env.HOME || "", ".local/state/gnuradio"),
 ];
 
-const OUTPUT_DIR = path.join(process.cwd(), 'src', 'blocks');
-const OUTPUT_JSON = path.join(OUTPUT_DIR, 'blocks.json');
-const OUTPUT_TYPES = path.join(OUTPUT_DIR, 'types.ts');
-
-// Types for parsed blocks
-export interface BlockParameter {
-  id: string;
-  label: string;
-  dtype: string;
-  default?: any;
-  options?: any[];
-  option_labels?: string[];
-  option_attributes?: Record<string, any>;
-  hide?: string;
-}
-
-export interface BlockPort {
-  domain: string;
-  dtype: string;
-  vlen?: number | string;
-  multiplicity?: number | string;
-  optional?: boolean;
-}
-
-export interface BlockTemplates {
-  imports?: string;
-  make?: string;
-  callbacks?: string[];
-}
-
-export interface ParsedBlock {
-  id: string;
-  label: string;
-  category?: string;
-  flags?: string[];
-  parameters?: BlockParameter[];
-  inputs?: BlockPort[];
-  outputs?: BlockPort[];
-  templates?: BlockTemplates;
-  cpp_templates?: any;
-  documentation?: string;
-  file_format?: number;
-}
-
-interface BlocksByCategory {
-  [category: string]: ParsedBlock[];
-}
+const OUTPUT_DIR = path.join(process.cwd(), "src", "blocks");
+const OUTPUT_JSON = path.join(OUTPUT_DIR, "blocks.json");
+const OUTPUT_TYPES = path.join(OUTPUT_DIR, "types.ts");
 
 /**
  * Recursively find all .block.yml files in a directory
@@ -83,7 +44,7 @@ export function findBlockFiles(dir: string): string[] {
 
     if (stat.isDirectory()) {
       blockFiles.push(...findBlockFiles(filePath));
-    } else if (file.endsWith('.block.yml')) {
+    } else if (file.endsWith(".block.yml")) {
       blockFiles.push(filePath);
     }
   }
@@ -94,10 +55,10 @@ export function findBlockFiles(dir: string): string[] {
 /**
  * Parse a single block YAML file
  */
-export function parseBlockFile(filePath: string): ParsedBlock | null {
+export function parseBlockFile(filePath: string): GnuRadioBlock | null {
   try {
-    const content = fs.readFileSync(filePath, 'utf8');
-    const data = yaml.load(content) as ParsedBlock;
+    const content = fs.readFileSync(filePath, "utf8");
+    const data = yaml.load(content) as GnuRadioBlock;
 
     if (!data.id || !data.label) {
       console.warn(`Skipping invalid block file: ${filePath}`);
@@ -114,14 +75,14 @@ export function parseBlockFile(filePath: string): ParsedBlock | null {
 /**
  * Extract category from block data or derive from ID
  */
-export function getBlockCategory(block: ParsedBlock): string {
+export function getBlockCategory(block: GnuRadioBlock): string {
   if (block.category) {
     // Remove special category prefixes like '[Core]/'
-    return block.category.replace(/^\[.*?\]\//, '');
+    return block.category.replace(/^\[.*?\]\//, "");
   }
 
   // Derive category from block ID (e.g., "analog_agc_xx" -> "Analog")
-  const prefix = block.id.split('_')[0];
+  const prefix = block.id.split("_")[0];
   return prefix.charAt(0).toUpperCase() + prefix.slice(1);
 }
 
@@ -129,7 +90,7 @@ export function getBlockCategory(block: ParsedBlock): string {
  * Main function
  */
 function main() {
-  console.log('🔍 Scanning for GNU Radio blocks...\n');
+  console.log("🔍 Scanning for GNU Radio blocks...\n");
 
   // Create output directory if it doesn't exist
   if (!fs.existsSync(OUTPUT_DIR)) {
@@ -148,7 +109,7 @@ function main() {
   console.log(`\n📦 Total block files found: ${allBlockFiles.length}\n`);
 
   // Parse all blocks
-  const blocks: ParsedBlock[] = [];
+  const blocks: GnuRadioBlock[] = [];
   const blocksByCategory: BlocksByCategory = {};
 
   for (const filePath of allBlockFiles) {
@@ -172,13 +133,13 @@ function main() {
     .map(([category, blocks]) => ({ category, count: blocks.length }))
     .sort((a, b) => b.count - a.count);
 
-  console.log('Category breakdown:');
+  console.log("Category breakdown:");
   for (const { category, count } of categoryStats) {
     console.log(`  ${category.padEnd(20)} ${count} blocks`);
   }
 
   // Write blocks.json
-  const output = {
+  const output: BlocksData = {
     generated_at: new Date().toISOString(),
     total_blocks: blocks.length,
     categories: Object.keys(blocksByCategory).sort(),
@@ -189,68 +150,32 @@ function main() {
   fs.writeFileSync(OUTPUT_JSON, JSON.stringify(output, null, 2));
   console.log(`\n✨ Generated: ${OUTPUT_JSON}`);
 
-  // Generate TypeScript types
+  // Generate TypeScript types (re-export from main types file)
   const typesContent = `/**
  * GNU Radio Block Types
  *
  * Auto-generated on ${new Date().toISOString()}
  * Total blocks: ${blocks.length}
+ *
+ * Note: This file re-exports types from @/types/blocks
+ * Import directly from @/types/blocks for better type inference
  */
 
-export interface BlockParameter {
-  id: string;
-  label: string;
-  dtype: string;
-  default?: any;
-  options?: any[];
-  option_labels?: string[];
-  option_attributes?: Record<string, any>;
-  hide?: string;
-}
-
-export interface BlockPort {
-  domain: string;
-  dtype?: string;
-  id?: string;
-  label?: string;
-  vlen?: number | string;
-  multiplicity?: number | string;
-  optional?: boolean | string;
-}
-
-export interface BlockTemplates {
-  imports?: string;
-  make?: string;
-  callbacks?: string[];
-}
-
-export interface GnuRadioBlock {
-  id: string;
-  label: string;
-  category?: string;
-  flags?: string[];
-  parameters?: BlockParameter[];
-  inputs?: BlockPort[];
-  outputs?: BlockPort[];
-  templates?: BlockTemplates;
-  cpp_templates?: any;
-  documentation?: string;
-  file_format?: number;
-}
-
-export interface BlocksData {
-  generated_at: string;
-  total_blocks: number;
-  categories: string[];
-  blocks: GnuRadioBlock[];
-  blocksByCategory: Record<string, GnuRadioBlock[]>;
-}
+export type {
+  BlockParameter,
+  BlockPort,
+  BlockTemplates,
+  CppTemplates,
+  GnuRadioBlock,
+  BlocksByCategory,
+  BlocksData,
+} from '@/types/blocks';
 `;
 
   fs.writeFileSync(OUTPUT_TYPES, typesContent);
   console.log(`✨ Generated: ${OUTPUT_TYPES}`);
 
-  console.log('\n🎉 Block parsing complete!\n');
+  console.log("\n🎉 Block parsing complete!\n");
 }
 
 // Run the script

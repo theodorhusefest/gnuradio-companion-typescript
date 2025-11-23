@@ -4,8 +4,8 @@ import {
   findBlockFiles,
   getBlockCategory,
   parseBlockFile,
-  type ParsedBlock,
 } from "../../scripts/parse-blocks";
+import { GnuRadioBlock, ParsedBlock } from "../../src/types/blocks";
 
 describe("parse-blocks", () => {
   // Test fixtures path
@@ -13,7 +13,7 @@ describe("parse-blocks", () => {
 
   describe("getBlockCategory", () => {
     it("should extract category from block with explicit category", () => {
-      const block: ParsedBlock = {
+      const block: GnuRadioBlock = {
         id: "test_block",
         label: "Test Block",
         category: "Signal Processing",
@@ -23,7 +23,7 @@ describe("parse-blocks", () => {
     });
 
     it("should remove [Core] prefix from category", () => {
-      const block: ParsedBlock = {
+      const block: GnuRadioBlock = {
         id: "analog_agc",
         label: "AGC",
         category: "[Core]/Analog",
@@ -33,7 +33,7 @@ describe("parse-blocks", () => {
     });
 
     it("should remove any bracketed prefix from category", () => {
-      const block: ParsedBlock = {
+      const block: GnuRadioBlock = {
         id: "test_block",
         label: "Test",
         category: "[Custom]/Filters/Low Pass",
@@ -43,7 +43,7 @@ describe("parse-blocks", () => {
     });
 
     it("should derive category from block ID when category is missing", () => {
-      const block: ParsedBlock = {
+      const block: GnuRadioBlock = {
         id: "analog_agc_xx",
         label: "AGC",
       };
@@ -52,7 +52,7 @@ describe("parse-blocks", () => {
     });
 
     it("should handle single-word IDs", () => {
-      const block: ParsedBlock = {
+      const block: GnuRadioBlock = {
         id: "qtgui_waterfall",
         label: "Waterfall",
       };
