@@ -1,6 +1,6 @@
 import type { GnuRadioBlock } from "@/blocks/types";
 import {
-  addEdge,
+  addEdge as xyflowAddEdge,
   applyEdgeChanges,
   applyNodeChanges,
   Background,
@@ -9,18 +9,16 @@ import {
   ReactFlow,
   ReactFlowProvider,
   useReactFlow,
-  type Edge,
   type FitViewOptions,
-  type Node,
   type OnConnect,
   type OnEdgesChange,
   type OnNodesChange,
 } from "@xyflow/react";
-import { useCallback, useRef, useState, type DragEvent } from "react";
+import { useCallback, useRef, type DragEvent } from "react";
 import BlockNode from "./ui/blocks/BlockNode";
-
-const initialNodes: Node[] = [];
-const initialEdges: Edge[] = [];
+import { useGraphStore } from "@/stores/graphStore";
+import { useTemporalActions } from "@/stores/useTemporalStore";
+import type { GraphNode, GraphEdge, BlockInstanceData } from "@/types/graph";
 
 const fitViewOptions: FitViewOptions = {
   padding: 0.2,
@@ -30,7 +28,8 @@ let nodeId = 0;
 const getNodeId = () => `node_${nodeId++}`;
 
 const nodeTypes = {
-  gnuradioBlock: BlockNode,
+  block: BlockNode,
+  gnuradioBlock: BlockNode, // Keep for backward compatibility
 };
 
 const defaultEdgeOptions = {
@@ -44,24 +43,75 @@ const connectionLineStyle = {
 };
 
 function ReactFlowContent() {
-  const [nodes, setNodes] = useState(initialNodes);
-  const [edges, setEdges] = useState(initialEdges);
+  // Use Zustand stores instead of local state
+  const nodes = useGraphStore((state) => state.nodes);
+  const edges = useGraphStore((state) => state.edges);
+  const setNodes = useGraphStore((state) => state.setNodes);
+  const setEdges = useGraphStore((state) => state.setEdges);
+  const addEdge = useGraphStore((state) => state.addEdge);
+  const { takeSnapshot } = useTemporalActions();
+
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { screenToFlowPosition } = useReactFlow();
 
   const onNodesChange: OnNodesChange = useCallback(
-    (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
-    [setNodes]
+    (changes) => {
+      const hasSignificantChange = changes.some(
+        (change) => change.type === "remove" || change.type === "add"
+      );
+      if (hasSignificantChange) {
+        takeSnapshot();
+      }
+
+      const updatedNodes = applyNodeChanges(changes, nodes);
+      setNodes(updatedNodes as GraphNode[]);
+    },
+    [nodes, setNodes, takeSnapshot]
   );
+
   const onEdgesChange: OnEdgesChange = useCallback(
-    (changes) =>
-      setEdges((edgesSnapshot) => applyEdgeChanges(changes, edgesSnapshot)),
-    []
+    (changes) => {
+      // Take snapshot before edge changes
+      const hasSignificantChange = changes.some(
+        (change) => change.type === "remove" || change.type === "add"
+      );
+      if (hasSignificantChange) {
+        takeSnapshot();
+      }
+
+      // Apply XyFlow changes and sync to store
+      const updatedEdges = applyEdgeChanges(changes, edges);
+      setEdges(updatedEdges as GraphEdge[]);
+    },
+    [edges, setEdges, takeSnapshot]
   );
+
   const onConnect: OnConnect = useCallback(
-    (connection) => setEdges((eds) => addEdge(connection, eds)),
-    [setEdges]
+    (connection) => {
+      // Take snapshot before adding edge
+      takeSnapshot();
+
+      // Create edge with connection data
+      const newEdge = xyflowAddEdge(connection, edges)[
+        edges.length
+      ] as GraphEdge;
+      if (newEdge) {
+        // Add connection metadata
+        newEdge.data = {
+          sourcePort: connection.sourceHandle || "0",
+          targetPort: connection.targetHandle || "0",
+        };
+        addEdge(newEdge);
+      }
+    },
+    [edges, addEdge, takeSnapshot]
   );
+
+  const onNodeDragStart = useCallback(() => {
+    // Take snapshot BEFORE dragging to capture old position
+    // This ensures undo restores to the position before the drag started
+    takeSnapshot();
+  }, [takeSnapshot]);
 
   const onDragOver = useCallback((event: DragEvent) => {
     event.preventDefault();
@@ -73,12 +123,12 @@ function ReactFlowContent() {
       event.preventDefault();
 
       // Get the block data from the drag event
-      const blockData = event.dataTransfer.getData(
+      const blockDataString = event.dataTransfer.getData(
         "application/gnuradio-block"
       );
-      if (!blockData) return;
+      if (!blockDataString) return;
 
-      const block: GnuRadioBlock = JSON.parse(blockData);
+      const block: GnuRadioBlock = JSON.parse(blockDataString);
 
       // Calculate position on the canvas
       const position = screenToFlowPosition({
@@ -86,22 +136,42 @@ function ReactFlowContent() {
         y: event.clientY,
       });
 
-      // Create new node
+      // Create new node with proper GraphNode structure
       const nodeIdValue = getNodeId();
-      const newNode: Node = {
-        id: nodeIdValue,
-        type: "gnuradioBlock",
-        position,
-        data: {
-          label: block.label,
-          block: block,
-          nodeId: nodeIdValue,
-        },
+
+      // Initialize parameters with default values from block definition
+      const initialParameters: Record<string, string | number | boolean> = {};
+      block.parameters?.forEach((param) => {
+        if (param.default !== undefined) {
+          initialParameters[param.id] = param.default;
+        }
+      });
+
+      const instanceData: BlockInstanceData = {
+        blockDefinition: block,
+        parameters: initialParameters,
+        instanceName: nodeIdValue,
+        enabled: true,
+        bus_sink: false,
+        bus_source: false,
+        bus_structure: null,
+        rotation: 0,
       };
 
-      setNodes((nds) => nds.concat(newNode));
+      const newNode: GraphNode = {
+        id: nodeIdValue,
+        type: "block",
+        position,
+        data: instanceData,
+      };
+
+      // Take snapshot before adding node (captures state without this node)
+      takeSnapshot();
+
+      // Add to store
+      setNodes([...nodes, newNode]);
     },
-    [screenToFlowPosition]
+    [screenToFlowPosition, nodes, setNodes, takeSnapshot]
   );
 
   return (
@@ -115,6 +185,7 @@ function ReactFlowContent() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onNodeDragStart={onNodeDragStart}
         onDrop={onDrop}
         onDragOver={onDragOver}
         fitViewOptions={fitViewOptions}

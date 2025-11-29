@@ -1,46 +1,54 @@
-import type { BlockParameter, GnuRadioBlock } from "@/blocks/types";
-import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
+import type { BlockParameter } from "@/blocks/types";
+import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { Separator } from "../separator";
 import type { CSSProperties } from "react";
 import { useState } from "react";
 import BlockDetailsDialog from "./BlockDetailsDialog";
+import { useGraphStore } from "@/stores/graphStore";
+import { useTemporalActions } from "@/stores/useTemporalStore";
+import type { GraphNode } from "@/types/graph";
 
-type BlockNode = Node<
-  {
-    label: string;
-    block: GnuRadioBlock;
-    nodeId: string;
-  },
-  "gnuradioBlock"
->;
+const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
+  const blockDefinition = data.blockDefinition;
+  const label = blockDefinition.label;
 
-const BlockNode = ({ data }: NodeProps<BlockNode>) => {
-  const { label, block, nodeId } = data;
+  // Get store actions
+  const updateNode = useGraphStore((state) => state.updateNode);
+  const { takeSnapshot } = useTemporalActions();
 
-  const inputs = block?.inputs?.filter((input) => !input.optional);
-  const outputs = block?.outputs?.filter((input) => !input.optional);
+  const inputs = blockDefinition.inputs?.filter((input) => !input.optional);
+  const outputs = blockDefinition.outputs?.filter((input) => !input.optional);
 
-  const isDeprecated = block.flags?.includes("deprecated");
+  const isDeprecated = blockDefinition.flags?.includes("deprecated");
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  // Store full parameter objects in state
-  const [parameters, setParameters] = useState<BlockParameter[]>(() => {
-    return block.parameters ? [...block.parameters] : [];
-  });
+  // Get current parameter values from node data or use defaults
+  const currentParameters = data.parameters || {};
 
-  const displayParameters = parameters.filter((param) => !param.hide);
-  const allParameters = parameters;
+  // Build parameter list with current values
+  const allParameters: BlockParameter[] = blockDefinition.parameters
+    ? blockDefinition.parameters.map((param) => ({
+        ...param,
+        default: currentParameters[param.id] ?? param.default,
+      }))
+    : [];
 
-  // Handler to update parameter defaults
-  const handleParametersUpdate = (updates: Record<string, string | number>) => {
-    setParameters((prevParams) =>
-      prevParams.map((param) => {
-        if (updates[param.id] !== undefined) {
-          return { ...param, default: updates[param.id] };
-        }
-        return param;
-      })
-    );
+  const displayParameters = allParameters.filter((param) => !param.hide);
+
+  // Handler to update parameters in the store
+  const handleParametersUpdate = (
+    updates: Record<string, string | number | boolean>
+  ) => {
+    // Take snapshot before updating parameters
+    takeSnapshot();
+
+    // Update the graph store with new parameter values
+    updateNode(id, {
+      parameters: {
+        ...currentParameters,
+        ...updates,
+      },
+    });
   };
 
   const handleStyle: CSSProperties = {
@@ -67,8 +75,8 @@ const BlockNode = ({ data }: NodeProps<BlockNode>) => {
           <div className="font-bold text-xl">{label}</div>
         </div>
 
-        {block.category && (
-          <div className="text mt-1 opacity-70">{block.category}</div>
+        {blockDefinition.category && (
+          <div className="text mt-1 opacity-70">{blockDefinition.category}</div>
         )}
 
         <div className="space-y-2">
@@ -109,7 +117,7 @@ const BlockNode = ({ data }: NodeProps<BlockNode>) => {
           open={dialogOpen}
           onOpenChange={setDialogOpen}
           parameters={allParameters}
-          nodeId={nodeId}
+          nodeId={id}
           onSave={handleParametersUpdate}
         />
       )}
