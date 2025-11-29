@@ -1,7 +1,7 @@
 import { BlocksWindow } from "@/components/BlocksWindow";
 import { DetailsWindow } from "@/components/DetailsWindow";
 import { ReactFlowWindow } from "@/components/ReactFlowWindow";
-import { Toolbar } from "@/components/Toolbar";
+import Toolbar from "@/components/Toolbar";
 import {
   ResizableHandle,
   ResizablePanel,

@@ -7,6 +7,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import { Button } from "../button";
 
 type Props = {
   open: boolean;
@@ -103,13 +104,9 @@ const BlockDetailsDialog = ({
 
         <DialogFooter>
           <DialogClose>Cancel</DialogClose>
-          <button
-            type="submit"
-            form={formId}
-            className="px-3 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
-          >
+          <Button type="submit" form={formId}>
             Save
-          </button>
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
