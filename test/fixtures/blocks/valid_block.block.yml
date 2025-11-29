@@ -1,0 +1,27 @@
+id: analog_agc_xx
+label: AGC
+category: '[Core]/Analog'
+flags: [python, cpp]
+
+parameters:
+  - id: type
+    label: Type
+    dtype: enum
+    default: complex
+    options: [complex, float]
+    option_labels: [Complex, Float]
+
+inputs:
+  - domain: stream
+    dtype: ${ type }
+
+outputs:
+  - domain: stream
+    dtype: ${ type }
+
+templates:
+  imports: from gnuradio import analog
+  make: analog.agc_xx(${type})
+
+documentation: |-
+  Automatic Gain Control block

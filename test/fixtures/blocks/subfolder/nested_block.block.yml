@@ -1,0 +1,21 @@
+id: blocks_throttle
+label: Throttle
+category: Miscellaneous
+
+parameters:
+  - id: samples_per_second
+    label: Sample Rate
+    dtype: real
+    default: samp_rate
+
+inputs:
+  - domain: stream
+    dtype: byte
+
+outputs:
+  - domain: stream
+    dtype: byte
+
+templates:
+  imports: from gnuradio import blocks
+  make: blocks.throttle(gr.sizeof_char*1, ${samples_per_second})
