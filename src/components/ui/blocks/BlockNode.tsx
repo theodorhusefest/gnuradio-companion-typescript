@@ -65,7 +65,7 @@ const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
   return (
     <>
       <div
-        className="px-4 py-2 rounded-lg border-2 min-w-[150px] shadow-sm bg-white"
+        className="px-4 py-2 rounded-lg border-2 min-w-[150px] shadow-sm bg-card shadow-foreground/10"
         style={{
           opacity: isDeprecated ? 0.6 : 1,
         }}
