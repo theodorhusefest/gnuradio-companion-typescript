@@ -6,25 +6,29 @@
  * to generate TypeScript types and a blocks.json file for the application.
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import * as yaml from 'js-yaml';
-import type { GnuRadioBlock, BlocksData, BlocksByCategory } from '../src/types/blocks.js';
+import * as fs from "fs";
+import * as yaml from "js-yaml";
+import * as path from "path";
+import type {
+  BlocksByCategory,
+  BlocksData,
+  GnuRadioBlock,
+} from "../src/types/blocks.js";
 
 // Configuration
 const BLOCK_PATHS = [
-  '/opt/homebrew/share/gnuradio/grc/blocks',
-  path.join(process.env.HOME || '', '.local/state/gnuradio'),
+  "/opt/homebrew/share/gnuradio/grc/blocks",
+  path.join(process.env.HOME || "", ".local/state/gnuradio"),
 ];
 
-const OUTPUT_DIR = path.join(process.cwd(), 'src', 'blocks');
-const OUTPUT_JSON = path.join(OUTPUT_DIR, 'blocks.json');
-const OUTPUT_TYPES = path.join(OUTPUT_DIR, 'types.ts');
+const OUTPUT_DIR = path.join(process.cwd(), "src", "blocks");
+const OUTPUT_JSON = path.join(OUTPUT_DIR, "blocks.json");
+const OUTPUT_TYPES = path.join(OUTPUT_DIR, "types.ts");
 
 /**
  * Recursively find all .block.yml files in a directory
  */
-function findBlockFiles(dir: string): string[] {
+export function findBlockFiles(dir: string): string[] {
   const blockFiles: string[] = [];
 
   if (!fs.existsSync(dir)) {
@@ -40,7 +44,7 @@ function findBlockFiles(dir: string): string[] {
 
     if (stat.isDirectory()) {
       blockFiles.push(...findBlockFiles(filePath));
-    } else if (file.endsWith('.block.yml')) {
+    } else if (file.endsWith(".block.yml")) {
       blockFiles.push(filePath);
     }
   }
@@ -51,9 +55,9 @@ function findBlockFiles(dir: string): string[] {
 /**
  * Parse a single block YAML file
  */
-function parseBlockFile(filePath: string): GnuRadioBlock | null {
+export function parseBlockFile(filePath: string): GnuRadioBlock | null {
   try {
-    const content = fs.readFileSync(filePath, 'utf8');
+    const content = fs.readFileSync(filePath, "utf8");
     const data = yaml.load(content) as GnuRadioBlock;
 
     if (!data.id || !data.label) {
@@ -71,14 +75,14 @@ function parseBlockFile(filePath: string): GnuRadioBlock | null {
 /**
  * Extract category from block data or derive from ID
  */
-function getBlockCategory(block: GnuRadioBlock): string {
+export function getBlockCategory(block: GnuRadioBlock): string {
   if (block.category) {
     // Remove special category prefixes like '[Core]/'
-    return block.category.replace(/^\[.*?\]\//, '');
+    return block.category.replace(/^\[.*?\]\//, "");
   }
 
   // Derive category from block ID (e.g., "analog_agc_xx" -> "Analog")
-  const prefix = block.id.split('_')[0];
+  const prefix = block.id.split("_")[0];
   return prefix.charAt(0).toUpperCase() + prefix.slice(1);
 }
 
@@ -86,7 +90,7 @@ function getBlockCategory(block: GnuRadioBlock): string {
  * Main function
  */
 function main() {
-  console.log('🔍 Scanning for GNU Radio blocks...\n');
+  console.log("🔍 Scanning for GNU Radio blocks...\n");
 
   // Create output directory if it doesn't exist
   if (!fs.existsSync(OUTPUT_DIR)) {
@@ -129,7 +133,7 @@ function main() {
     .map(([category, blocks]) => ({ category, count: blocks.length }))
     .sort((a, b) => b.count - a.count);
 
-  console.log('Category breakdown:');
+  console.log("Category breakdown:");
   for (const { category, count } of categoryStats) {
     console.log(`  ${category.padEnd(20)} ${count} blocks`);
   }
@@ -171,7 +175,7 @@ export type {
   fs.writeFileSync(OUTPUT_TYPES, typesContent);
   console.log(`✨ Generated: ${OUTPUT_TYPES}`);
 
-  console.log('\n🎉 Block parsing complete!\n');
+  console.log("\n🎉 Block parsing complete!\n");
 }
 
 // Run the script
