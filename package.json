@@ -9,11 +9,11 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "parse-blocks": "tsx scripts/parse-blocks.ts",
-    "predev": "npm run parse-blocks",
-    "prebuild": "npm run parse-blocks",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "predev": "pnpm run parse-blocks",
+    "prebuild": "pnpm run parse-blocks"
   },
   "dependencies": {
     "@radix-ui/react-collapsible": "^1.1.12",
