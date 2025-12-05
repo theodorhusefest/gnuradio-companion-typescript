@@ -19,6 +19,7 @@ import BlockNode from "./ui/blocks/BlockNode";
 import { useGraphStore } from "@/stores/graphStore";
 import { useTemporalActions } from "@/stores/useTemporalStore";
 import type { GraphNode, GraphEdge, BlockInstanceData } from "@/types/graph";
+import { useTheme } from "./theme-provider";
 
 const fitViewOptions: FitViewOptions = {
   padding: 0.2,
@@ -33,17 +34,19 @@ const nodeTypes = {
 };
 
 const defaultEdgeOptions = {
-  markerEnd: { type: MarkerType.ArrowClosed, color: "#000" },
-  style: { strokeWidth: 3, stroke: "#000" },
+  markerEnd: { type: MarkerType.ArrowClosed, color: "var(--foreground)" },
+  style: { strokeWidth: 3, stroke: "var(--foreground)" },
 };
 
 const connectionLineStyle = {
   strokeWidth: 3,
-  stroke: "#000",
+  stroke: "var(--foreground)",
 };
 
 function ReactFlowContent() {
   // Use Zustand stores instead of local state
+  const { theme } = useTheme();
+
   const nodes = useGraphStore((state) => state.nodes);
   const edges = useGraphStore((state) => state.edges);
   const setNodes = useGraphStore((state) => state.setNodes);
@@ -189,6 +192,7 @@ function ReactFlowContent() {
         onDrop={onDrop}
         onDragOver={onDragOver}
         fitViewOptions={fitViewOptions}
+        colorMode={theme}
       >
         <Background />
         <Controls />
