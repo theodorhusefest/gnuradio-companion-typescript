@@ -109,7 +109,6 @@ const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
         <div className="absolute right-0 top-0 flex flex-col justify-around h-full">
         {outputs?.map((output, index) => {
           const handleId = getPortHandleId(output, index, 'output');
-          console.log(index,'index',output)
           return (
             <Handle
               key={handleId}
