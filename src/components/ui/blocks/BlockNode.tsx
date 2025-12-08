@@ -7,6 +7,7 @@ import BlockDetailsDialog from "./BlockDetailsDialog";
 import { useGraphStore } from "@/stores/graphStore";
 import { useTemporalActions } from "@/stores/useTemporalStore";
 import type { GraphNode } from "@/types/graph";
+import { getPortHandleId } from "@/lib/utils";
 
 const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
   const blockDefinition = data.blockDefinition;
@@ -16,8 +17,8 @@ const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
   const updateNode = useGraphStore((state) => state.updateNode);
   const { takeSnapshot } = useTemporalActions();
 
-  const inputs = blockDefinition.inputs?.filter((input) => !input.optional);
-  const outputs = blockDefinition.outputs?.filter((input) => !input.optional);
+  const inputs = blockDefinition.inputs ?? [];
+  const outputs = blockDefinition.outputs ?? [];
 
   const isDeprecated = blockDefinition.flags?.includes("deprecated");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -61,13 +62,18 @@ const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
       setDialogOpen(true);
     }
   };
-
+  const minimumNodeHeight =
+    100 +
+    40 * (inputs.length > outputs.length ? inputs.length : outputs.length);
   return (
     <>
       <div
-        className="px-4 py-2 rounded-lg border-2 min-w-[150px] shadow-sm bg-card shadow-foreground/10"
+        className={
+          "relative px-4 py-2 rounded-lg border-2 min-w-[150px] shadow-sm bg-white"
+        }
         style={{
           opacity: isDeprecated ? 0.6 : 1,
+          minHeight: minimumNodeHeight,
         }}
         onDoubleClick={handleDoubleClick}
       >
@@ -90,25 +96,35 @@ const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
             </div>
           ))}
         </div>
-
-        {inputs?.map((input) => (
-          <Handle
-            key={input.id}
-            type="target"
-            style={handleStyle}
-            position={Position.Left}
-            id={input.id}
-          />
-        ))}
-        {outputs?.map((output) => (
-          <Handle
-            key={output.id}
-            type="source"
-            style={handleStyle}
-            position={Position.Right}
-            id={output.id}
-          />
-        ))}
+        <div className="absolute left-0 top-0 flex flex-col justify-around h-full">
+          {inputs?.map((input, index) => {
+            const handleId: string = getPortHandleId(input, index, "input");
+            return (
+              <Handle
+                key={handleId}
+                type="target"
+                style={{ ...handleStyle, position: "static" }} // Overide default absolute position
+                position={Position.Left}
+                id={handleId}
+              />
+            );
+          })}
+        </div>
+        <div className="absolute right-0 top-0 flex flex-col justify-around h-full">
+          {outputs?.map((output, index) => {
+            const handleId = getPortHandleId(output, index, "output");
+            console.log(index, "index", output);
+            return (
+              <Handle
+                key={handleId}
+                type="source"
+                style={{ ...handleStyle, position: "static" }}
+                position={Position.Right}
+                id={handleId}
+              />
+            );
+          })}
+        </div>
       </div>
 
       {/* Dialog for editing parameters */}
