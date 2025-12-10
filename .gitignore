@@ -35,3 +35,7 @@ src/blocks/types.ts
 
 # Test coverage
 coverage
+
+# Env
+.env
+.env.local
