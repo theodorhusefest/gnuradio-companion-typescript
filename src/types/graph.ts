@@ -7,6 +7,7 @@
 
 import type { Node, Edge } from "@xyflow/react";
 import type { GnuRadioBlock } from "./blocks";
+import type { GRCOptions, GRCMetadata } from "../services/grcConverter";
 
 /**
  * Block instance data stored in each node
@@ -59,6 +60,10 @@ export type GraphState = {
   nodes: GraphNode[];
   edges: GraphEdge[];
 
+  // GRC file metadata (preserved from loaded files)
+  grcOptions?: GRCOptions;
+  grcMetadata?: GRCMetadata;
+
   // Node operations
   addNode: (node: GraphNode) => void;
   updateNode: (id: string, data: Partial<BlockInstanceData>) => void;
@@ -70,9 +75,13 @@ export type GraphState = {
   removeEdge: (id: string) => void;
   setEdges: (edges: GraphEdge[]) => void;
 
+  // GRC metadata operations
+  setGrcOptions: (options: GRCOptions | undefined) => void;
+  setGrcMetadata: (metadata: GRCMetadata | undefined) => void;
+
   // Batch operations
   deleteNodeAndEdges: (nodeId: string) => void;
-  importGraph: (nodes: GraphNode[], edges: GraphEdge[]) => void;
+  importGraph: (nodes: GraphNode[], edges: GraphEdge[], grcOptions?: GRCOptions, grcMetadata?: GRCMetadata) => void;
   clearGraph: () => void;
 };
 
