@@ -40,6 +40,11 @@ const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
     updateNodeInternals(id);
   }, [id, inputs.length, outputs.length, updateNodeInternals]);
 
+
+  useEffect(() => {
+    updateNodeInternals(id);
+  }, [id, inputs.length, outputs.length, updateNodeInternals]);
+
   const displayParameters = allParameters.filter((param) => !param.hide);
 
   const handleParametersUpdate = (
