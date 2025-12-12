@@ -36,6 +36,16 @@ export const getPortHandleId = (
   return type === "input" ? `in${index}` : `out${index}`;
 };
 
+/**
+ * Filters ports based on optional flag and showPorts setting
+ */
+export function getPorts(
+  ports: BlockPort[] | undefined,
+  shouldShowPorts: boolean
+): BlockPort[] {
+  return ports?.filter((port) => !port.optional || shouldShowPorts) ?? [];
+}
+
 export const getPortColor = (
   port: BlockPort,
   blockDType: string | undefined
