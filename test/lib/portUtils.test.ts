@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import {getPortHandleId} from "../../src/lib/utils";
+import { getPortHandleId } from "../../src/lib/portUtils";
 import type { BlockPort } from "../../src/blocks/types";
 
 describe("blockUtils", () => {
@@ -53,5 +53,5 @@ describe("blockUtils", () => {
       expect(getPortHandleId(port, 1, "output")).toBe("out1");
       expect(getPortHandleId(port, 3, "output")).toBe("out3");
     });
-  })
-})
+  });
+});

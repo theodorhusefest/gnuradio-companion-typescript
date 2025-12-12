@@ -1,24 +1,22 @@
 import type { BlockParameter } from "@/blocks/types";
-import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { type NodeProps, useUpdateNodeInternals } from "@xyflow/react";
 import { Separator } from "../separator";
-import type { CSSProperties } from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import BlockDetailsDialog from "./BlockDetailsDialog";
 import { useGraphStore } from "@/stores/graphStore";
 import { useTemporalActions } from "@/stores/useTemporalStore";
 import type { GraphNode } from "@/types/graph";
-import { getPortHandleId } from "@/lib/utils";
+import { getPortHandleId } from "@/lib/portUtils";
+import Port from "./Port";
 
 const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
   const blockDefinition = data.blockDefinition;
   const label = blockDefinition.label;
+  const updateNodeInternals = useUpdateNodeInternals();
 
   // Get store actions
   const updateNode = useGraphStore((state) => state.updateNode);
   const { takeSnapshot } = useTemporalActions();
-
-  const inputs = blockDefinition.inputs ?? [];
-  const outputs = blockDefinition.outputs ?? [];
 
   const isDeprecated = blockDefinition.flags?.includes("deprecated");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -29,10 +27,19 @@ const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
   // Build parameter list with current values
   const allParameters: BlockParameter[] = blockDefinition.parameters
     ? blockDefinition.parameters.map((param) => ({
-        ...param,
-        default: currentParameters[param.id] ?? param.default,
-      }))
+      ...param,
+      default: currentParameters[param.id] ?? param.default,
+    }))
     : [];
+
+  const blockType = allParameters.find((param) => param.id === "type")?.default;
+
+  const inputs = blockDefinition.inputs ?? [];
+  const outputs = blockDefinition.outputs ?? [];
+
+  useEffect(() => {
+    updateNodeInternals(id);
+  }, [id, inputs.length, outputs.length, updateNodeInternals]);
 
   const displayParameters = allParameters.filter((param) => !param.hide);
 
@@ -52,24 +59,23 @@ const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
     });
   };
 
-  const handleStyle: CSSProperties = {
-    width: "1em",
-    height: "1em",
-  };
-
   const handleDoubleClick = () => {
     if (allParameters && allParameters.length > 0) {
       setDialogOpen(true);
     }
   };
-  const minimumNodeHeight = 100 + 40*(inputs.length > outputs.length ? inputs.length : outputs.length)
+  const minimumNodeHeight =
+    100 +
+    40 * (inputs.length > outputs.length ? inputs.length : outputs.length);
   return (
     <>
       <div
-        className="px-4 py-2 rounded-lg border-2 min-w-[150px] shadow-sm bg-card shadow-foreground/10"
+        className={
+          "relative px-4 py-2 rounded-lg border-2 min-w-[150px] shadow-sm bg-white"
+        }
         style={{
           opacity: isDeprecated ? 0.6 : 1,
-          minHeight: minimumNodeHeight
+          minHeight: minimumNodeHeight,
         }}
         onDoubleClick={handleDoubleClick}
       >
@@ -92,33 +98,33 @@ const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
             </div>
           ))}
         </div>
-        <div className="absolute left-0 top-0 flex flex-col justify-around h-full">
+        <div className="absolute -left-12 top-0 flex flex-col justify-around h-full">
           {inputs?.map((input, index) => {
-            const handleId: string = getPortHandleId(input, index, 'input');
+            const handleId: string = getPortHandleId(input, index, "input");
             return (
-              <Handle
+              <Port
                 key={handleId}
-                type="target"
-                style={{...handleStyle, position: 'static'}}  // Overide default absolute position
-                position={Position.Left}
-                id={handleId}
+                portId={handleId}
+                port={input}
+                type="input"
+                blockDType={blockType?.toString()}
               />
             );
           })}
         </div>
-        <div className="absolute right-0 top-0 flex flex-col justify-around h-full">
-        {outputs?.map((output, index) => {
-          const handleId = getPortHandleId(output, index, 'output');
-          return (
-            <Handle
-              key={handleId}
-              type="source"
-              style={{...handleStyle, position: 'static'}}
-              position={Position.Right}
-              id={handleId}
-            />
-          );
-        })}
+        <div className="absolute -right-12 top-0 flex flex-col justify-around h-full">
+          {outputs?.map((output, index) => {
+            const handleId = getPortHandleId(output, index, "output");
+            return (
+              <Port
+                key={handleId}
+                portId={handleId}
+                port={output}
+                type="output"
+                blockDType={blockType?.toString()}
+              />
+            );
+          })}
         </div>
       </div>
 
