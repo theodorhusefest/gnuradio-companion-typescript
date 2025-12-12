@@ -34,8 +34,19 @@ const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
 
   const blockType = allParameters.find((param) => param.id === "type")?.default;
 
-  const inputs = blockDefinition.inputs ?? [];
-  const outputs = blockDefinition.outputs ?? [];
+  const showMsgPortsParam = allParameters.find(
+    (param) => param.id === "showports"
+  );
+  const shouldShowPorts = showMsgPortsParam?.default === "True";
+
+  const inputs =
+    blockDefinition.inputs?.filter(
+      (input) => !input.optional || shouldShowPorts
+    ) ?? [];
+  const outputs =
+    blockDefinition.outputs?.filter(
+      (output) => !output.optional || shouldShowPorts
+    ) ?? [];
 
   useEffect(() => {
     updateNodeInternals(id);
