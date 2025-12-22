@@ -1,4 +1,4 @@
-import { type NodeProps, useUpdateNodeInternals } from "@xyflow/react";
+import { Position, type NodeProps, useUpdateNodeInternals } from "@xyflow/react";
 import { useState, useEffect } from "react";
 import BlockDetailsDialog from "./BlockDetailsDialog";
 import ParametersDisplay from "./ParametersDisplay";
@@ -14,13 +14,35 @@ import {
   calculateNodeHeight,
 } from "@/lib/blockUtils";
 
+// Map rotation to handle positions
+const getHandlePositions = (rotation: number): { input: Position; output: Position } => {
+  switch (rotation) {
+    case 90:
+      return { input: Position.Top, output: Position.Bottom };
+    case 180:
+      return { input: Position.Right, output: Position.Left };
+    case 270:
+      return { input: Position.Bottom, output: Position.Top };
+    default: // 0
+      return { input: Position.Left, output: Position.Right };
+  }
+};
+
 const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
   const blockDefinition = data.blockDefinition;
   const label = blockDefinition.label;
-  const updateNodeInternals = useUpdateNodeInternals();
+  const rotation = data.rotation || 0;
 
   const updateNode = useGraphStore((state) => state.updateNode);
   const { takeSnapshot } = useTemporalActions();
+  const updateNodeInternals = useUpdateNodeInternals();
+
+  // Update node internals when rotation changes (for handle positions)
+  useEffect(() => {
+    updateNodeInternals(id);
+  }, [rotation, id, updateNodeInternals]);
+
+  const { input: inputPosition, output: outputPosition } = getHandlePositions(rotation);
 
   const isDeprecated = blockDefinition.flags?.includes("deprecated");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -91,23 +113,27 @@ const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
           ports={inputs}
           type="input"
           blockDType={portDType}
+          position={inputPosition}
         />
         <PortsContainer
           ports={outputs}
           type="output"
           blockDType={portDType}
+          position={outputPosition}
         />
-      </div>
+      </div >
 
-      {allParameters.length > 0 && (
-        <BlockDetailsDialog
-          open={dialogOpen}
-          onOpenChange={setDialogOpen}
-          parameters={allParameters}
-          nodeId={id}
-          onSave={handleParametersUpdate}
-        />
-      )}
+      {
+        allParameters.length > 0 && (
+          <BlockDetailsDialog
+            open={dialogOpen}
+            onOpenChange={setDialogOpen}
+            parameters={allParameters}
+            nodeId={id}
+            onSave={handleParametersUpdate}
+          />
+        )
+      }
     </>
   );
 };

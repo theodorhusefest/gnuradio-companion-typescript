@@ -30,8 +30,8 @@ import {
   ContextMenuShortcut,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { Clipboard, ClipboardCopy, Scissors, Trash2 } from "lucide-react";
 import { getPortDTypeFromNode, getEdgeColorFromDTypes } from "@/lib/portUtils";
+import { Clipboard, ClipboardCopy, RotateCcw, RotateCw, Scissors, Trash2 } from "lucide-react";
 
 const fitViewOptions: FitViewOptions = {
   padding: 0.2,
@@ -83,6 +83,24 @@ function ReactFlowContent() {
   // Check if clipboard has content
   const hasClipboard = clipboard !== null && clipboard.nodes.length > 0;
 
+  // Rotation functionality
+  const updateNode = useGraphStore((state) => state.updateNode);
+
+  const rotateSelected = useCallback(
+    (angle: number) => {
+      const selectedNodes = nodes.filter((node) => node.selected);
+      if (selectedNodes.length === 0) return;
+
+      takeSnapshot();
+      selectedNodes.forEach((node) => {
+        const currentRotation = node.data.rotation || 0;
+        const newRotation = (currentRotation + angle + 360) % 360;
+        updateNode(node.id, { rotation: newRotation });
+      });
+    },
+    [nodes, updateNode, takeSnapshot]
+  );
+
   // Keyboard shortcuts for clipboard operations
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -116,11 +134,24 @@ function ReactFlowContent() {
           deleteSelected();
         }
       }
+
+      // Rotate: R (clockwise) or Shift+R (counterclockwise)
+      if (!isModifier && (event.key === "r" || event.key === "R")) {
+        const target = event.target as HTMLElement;
+        if (target.tagName !== "INPUT" && target.tagName !== "TEXTAREA") {
+          event.preventDefault();
+          if (event.shiftKey) {
+            rotateSelected(-90);
+          } else {
+            rotateSelected(90);
+          }
+        }
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [copy, cut, paste, deleteSelected]);
+  }, [copy, cut, paste, deleteSelected, rotateSelected]);
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { screenToFlowPosition } = useReactFlow();
@@ -311,6 +342,17 @@ function ReactFlowContent() {
           <Clipboard className="mr-2 h-4 w-4" />
           Paste
           <ContextMenuShortcut>{isMac ? "⌘V" : "Ctrl+V"}</ContextMenuShortcut>
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem onClick={() => rotateSelected(90)} disabled={!hasSelection}>
+          <RotateCw className="mr-2 h-4 w-4" />
+          Rotate Clockwise
+          <ContextMenuShortcut>R</ContextMenuShortcut>
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => rotateSelected(-90)} disabled={!hasSelection}>
+          <RotateCcw className="mr-2 h-4 w-4" />
+          Rotate Counterclockwise
+          <ContextMenuShortcut>⇧R</ContextMenuShortcut>
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem

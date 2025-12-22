@@ -8,24 +8,32 @@ type Props = {
   portId: string;
   type: "input" | "output";
   blockDType: string | undefined;
+  position: Position;
 };
 
-const Port = ({ port, portId, type, blockDType }: Props) => {
+const Port = ({ port, portId, type, blockDType, position }: Props) => {
   const isInput = type === "input";
+
+  const handleTransform = {
+    [Position.Left]: "translate(0, -50%)",
+    [Position.Right]: "translate(-100%, -50%)",
+    [Position.Top]: "translate(-50%, 10%)",
+    [Position.Bottom]: "translate(-50%, -100%)",
+  }[position];
 
   return (
     <Handle
       type={isInput ? "target" : "source"}
-      position={isInput ? Position.Left : Position.Right}
+      position={position}
       id={portId}
       style={{ position: "static", background: "transparent" }}
     >
       <div
         className={cn(
           getPortColor(port, blockDType),
-          "absolute w-12 -translate-y-1/2 flex items-center justify-center rounded",
-          !isInput && "-left-12"
+          "w-12 flex items-center justify-center h-4 rounded text-xs"
         )}
+        style={{ transform: handleTransform }}
       >
         {portId}
       </div>
