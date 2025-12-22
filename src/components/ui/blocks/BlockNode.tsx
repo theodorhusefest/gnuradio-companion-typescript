@@ -1,20 +1,43 @@
 import type { BlockParameter } from "@/blocks/types";
-import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { Handle, Position, useUpdateNodeInternals, type NodeProps } from "@xyflow/react";
 import { Separator } from "../separator";
 import type { CSSProperties } from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import BlockDetailsDialog from "./BlockDetailsDialog";
 import { useGraphStore } from "@/stores/graphStore";
 import { useTemporalActions } from "@/stores/useTemporalStore";
 import type { GraphNode } from "@/types/graph";
 
+// Map rotation to handle positions
+const getHandlePositions = (rotation: number): { input: Position; output: Position } => {
+  switch (rotation) {
+    case 90:
+      return { input: Position.Top, output: Position.Bottom };
+    case 180:
+      return { input: Position.Right, output: Position.Left };
+    case 270:
+      return { input: Position.Bottom, output: Position.Top };
+    default: // 0
+      return { input: Position.Left, output: Position.Right };
+  }
+};
+
 const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
   const blockDefinition = data.blockDefinition;
   const label = blockDefinition.label;
+  const rotation = data.rotation || 0;
 
   // Get store actions
   const updateNode = useGraphStore((state) => state.updateNode);
   const { takeSnapshot } = useTemporalActions();
+  const updateNodeInternals = useUpdateNodeInternals();
+
+  // Update node internals when rotation changes (for handle positions)
+  useEffect(() => {
+    updateNodeInternals(id);
+  }, [rotation, id, updateNodeInternals]);
+
+  const { input: inputPosition, output: outputPosition } = getHandlePositions(rotation);
 
   const inputs = blockDefinition.inputs?.filter((input) => !input.optional);
   const outputs = blockDefinition.outputs?.filter((input) => !input.optional);
@@ -96,7 +119,7 @@ const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
             key={input.id}
             type="target"
             style={handleStyle}
-            position={Position.Left}
+            position={inputPosition}
             id={input.id}
           />
         ))}
@@ -105,7 +128,7 @@ const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
             key={output.id}
             type="source"
             style={handleStyle}
-            position={Position.Right}
+            position={outputPosition}
             id={output.id}
           />
         ))}
