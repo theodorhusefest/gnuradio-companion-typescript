@@ -7,11 +7,14 @@
 
 import { create } from 'zustand';
 import type { GraphState, GraphNode, GraphEdge } from '../types/graph';
+import type { GRCOptions, GRCMetadata } from '../services/grcConverter';
 
 export const useGraphStore = create<GraphState>((set) => ({
   // Initial state
   nodes: [],
   edges: [],
+  grcOptions: undefined,
+  grcMetadata: undefined,
 
   // Node operations
   addNode: (node: GraphNode) => {
@@ -57,6 +60,15 @@ export const useGraphStore = create<GraphState>((set) => ({
     set({ edges });
   },
 
+  // GRC metadata operations
+  setGrcOptions: (grcOptions: GRCOptions | undefined) => {
+    set({ grcOptions });
+  },
+
+  setGrcMetadata: (grcMetadata: GRCMetadata | undefined) => {
+    set({ grcMetadata });
+  },
+
   // Batch operations
   deleteNodeAndEdges: (nodeId: string) => {
     set((state) => {
@@ -74,10 +86,12 @@ export const useGraphStore = create<GraphState>((set) => ({
     });
   },
 
-  importGraph: (nodes: GraphNode[], edges: GraphEdge[]) => {
+  importGraph: (nodes: GraphNode[], edges: GraphEdge[], grcOptions?: GRCOptions, grcMetadata?: GRCMetadata) => {
     set({
       nodes,
       edges,
+      grcOptions,
+      grcMetadata,
     });
   },
 
@@ -85,6 +99,8 @@ export const useGraphStore = create<GraphState>((set) => ({
     set({
       nodes: [],
       edges: [],
+      grcOptions: undefined,
+      grcMetadata: undefined,
     });
   },
 }));
