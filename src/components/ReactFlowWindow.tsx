@@ -14,12 +14,23 @@ import {
   type OnEdgesChange,
   type OnNodesChange,
 } from "@xyflow/react";
-import { useCallback, useRef, type DragEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, type DragEvent } from "react";
 import BlockNode from "./ui/blocks/BlockNode";
 import { useGraphStore } from "@/stores/graphStore";
 import { useTemporalActions } from "@/stores/useTemporalStore";
+import { useClipboardStore } from "@/stores/clipboardStore";
+import { useClipboard } from "@/hooks/useClipboard";
 import type { GraphNode, GraphEdge, BlockInstanceData } from "@/types/graph";
 import { useTheme } from "./theme-provider";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import { Clipboard, ClipboardCopy, Scissors, Trash2 } from "lucide-react";
 
 const fitViewOptions: FitViewOptions = {
   padding: 0.2,
@@ -43,6 +54,11 @@ const connectionLineStyle = {
   stroke: "var(--foreground)",
 };
 
+// Detect if user is on Mac for keyboard shortcut display
+const isMac =
+  typeof navigator !== "undefined" &&
+  /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+
 function ReactFlowContent() {
   // Use Zustand stores instead of local state
   const { theme } = useTheme();
@@ -53,6 +69,57 @@ function ReactFlowContent() {
   const setEdges = useGraphStore((state) => state.setEdges);
   const addEdge = useGraphStore((state) => state.addEdge);
   const { takeSnapshot } = useTemporalActions();
+
+  // Clipboard functionality
+  const clipboard = useClipboardStore((state) => state.clipboard);
+  const { copy, cut, paste, deleteSelected } = useClipboard();
+
+  // Check if there's a selection
+  const hasSelection = useMemo(() => {
+    return nodes.some((node) => node.selected) || edges.some((edge) => edge.selected);
+  }, [nodes, edges]);
+
+  // Check if clipboard has content
+  const hasClipboard = clipboard !== null && clipboard.nodes.length > 0;
+
+  // Keyboard shortcuts for clipboard operations
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Check for Cmd (Mac) or Ctrl (Windows/Linux)
+      const isModifier = event.metaKey || event.ctrlKey;
+
+      // Copy: Cmd/Ctrl + C
+      if (isModifier && event.key === "c") {
+        event.preventDefault();
+        copy();
+      }
+
+      // Cut: Cmd/Ctrl + X
+      if (isModifier && event.key === "x") {
+        event.preventDefault();
+        cut();
+      }
+
+      // Paste: Cmd/Ctrl + V
+      if (isModifier && event.key === "v") {
+        event.preventDefault();
+        paste();
+      }
+
+      // Delete: Delete or Backspace (without modifier)
+      if (!isModifier && (event.key === "Delete" || event.key === "Backspace")) {
+        // Only handle if not typing in an input field
+        const target = event.target as HTMLElement;
+        if (target.tagName !== "INPUT" && target.tagName !== "TEXTAREA") {
+          event.preventDefault();
+          deleteSelected();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [copy, cut, paste, deleteSelected]);
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { screenToFlowPosition } = useReactFlow();
@@ -178,26 +245,57 @@ function ReactFlowContent() {
   );
 
   return (
-    <div ref={reactFlowWrapper} className="h-full w-full">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        nodeTypes={nodeTypes}
-        defaultEdgeOptions={defaultEdgeOptions}
-        connectionLineStyle={connectionLineStyle}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onNodeDragStart={onNodeDragStart}
-        onDrop={onDrop}
-        onDragOver={onDragOver}
-        fitViewOptions={fitViewOptions}
-        colorMode={theme}
-      >
-        <Background />
-        <Controls />
-      </ReactFlow>
-    </div>
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <div ref={reactFlowWrapper} className="h-full w-full">
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            nodeTypes={nodeTypes}
+            defaultEdgeOptions={defaultEdgeOptions}
+            connectionLineStyle={connectionLineStyle}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onNodeDragStart={onNodeDragStart}
+            onDrop={onDrop}
+            onDragOver={onDragOver}
+            fitViewOptions={fitViewOptions}
+            colorMode={theme}
+          >
+            <Background />
+            <Controls />
+          </ReactFlow>
+        </div>
+      </ContextMenuTrigger>
+      <ContextMenuContent className="w-48">
+        <ContextMenuItem onClick={cut} disabled={!hasSelection}>
+          <Scissors className="mr-2 h-4 w-4" />
+          Cut
+          <ContextMenuShortcut>{isMac ? "⌘X" : "Ctrl+X"}</ContextMenuShortcut>
+        </ContextMenuItem>
+        <ContextMenuItem onClick={copy} disabled={!hasSelection}>
+          <ClipboardCopy className="mr-2 h-4 w-4" />
+          Copy
+          <ContextMenuShortcut>{isMac ? "⌘C" : "Ctrl+C"}</ContextMenuShortcut>
+        </ContextMenuItem>
+        <ContextMenuItem onClick={paste} disabled={!hasClipboard}>
+          <Clipboard className="mr-2 h-4 w-4" />
+          Paste
+          <ContextMenuShortcut>{isMac ? "⌘V" : "Ctrl+V"}</ContextMenuShortcut>
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem
+          onClick={deleteSelected}
+          disabled={!hasSelection}
+          variant="destructive"
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          Delete
+          <ContextMenuShortcut>{isMac ? "⌫" : "Del"}</ContextMenuShortcut>
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
 
