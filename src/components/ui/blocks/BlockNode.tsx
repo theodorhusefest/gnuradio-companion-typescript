@@ -9,7 +9,7 @@ import type { GraphNode } from "@/types/graph";
 import { getPorts } from "@/lib/portUtils";
 import {
   buildParametersWithValues,
-  getBlockType,
+  getPortDType,
   getShouldShowPorts,
   calculateNodeHeight,
 } from "@/lib/blockUtils";
@@ -31,7 +31,7 @@ const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
     currentParameters
   );
 
-  const blockType = getBlockType(allParameters);
+  const portDType = getPortDType(allParameters);
   const shouldShowPorts = getShouldShowPorts(allParameters);
   const inputs = getPorts(blockDefinition.inputs, shouldShowPorts);
   const outputs = getPorts(blockDefinition.outputs, shouldShowPorts);
@@ -90,12 +90,12 @@ const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
         <PortsContainer
           ports={inputs}
           type="input"
-          blockDType={blockType}
+          blockDType={portDType}
         />
         <PortsContainer
           ports={outputs}
           type="output"
-          blockDType={blockType}
+          blockDType={portDType}
         />
       </div>
 

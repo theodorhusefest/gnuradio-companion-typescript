@@ -18,7 +18,7 @@ export function buildParametersWithValues(
  * Extracts the block type from parameters
  * If the type parameter has no default but has options, uses the first option
  */
-export function getBlockType(
+export function getPortDType(
   parameters: BlockParameter[]
 ): string | undefined {
   const typeParam = parameters.find((param) => param.id === "type");
