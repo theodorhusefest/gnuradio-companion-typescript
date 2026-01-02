@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -6,11 +6,13 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ChevronRight, Search } from "lucide-react";
-import type { BlocksData, GnuRadioBlock } from "@/blocks/types";
-import blocksData from "@/blocks/blocks.json";
-
-const blocks = blocksData as BlocksData;
+import { ChevronRight, Search, AlertCircle, Loader2 } from "lucide-react";
+import type { GnuRadioBlock } from "@/types/blocks";
+import {
+  useBlocksStore,
+  useBlocksStatus,
+  useBlocks,
+} from "@/stores/blocksStore";
 
 type CategoryBlocksProps = {
   category: string;
@@ -84,31 +86,70 @@ function CategoryBlocks({
   );
 }
 
-export function BlocksWindow() {
+function BlocksLoading() {
+  return (
+    <div className="h-full w-full bg-background border-l flex flex-col items-center justify-center p-8">
+      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-4" />
+      <p className="text-sm text-muted-foreground">Loading blocks...</p>
+    </div>
+  );
+}
+
+function BlocksError({
+  error,
+  onRetry,
+}: {
+  error: string;
+  onRetry: () => void;
+}) {
+  const source = useBlocksStore((state) => state.source);
+  const sourceUrl = useBlocksStore((state) => state.sourceUrl);
+
+  return (
+    <div className="h-full w-full bg-background border-l flex flex-col items-center justify-center p-8">
+      <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+      <h3 className="font-semibold text-lg mb-2">Failed to Load Blocks</h3>
+      <p className="text-sm text-muted-foreground text-center mb-4 max-w-xs">
+        {error}
+      </p>
+      <div className="text-xs text-muted-foreground mb-4">
+        <p>Source: {source}</p>
+        {sourceUrl && <p>URL: {sourceUrl}</p>}
+      </div>
+      <button
+        onClick={onRetry}
+        className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:bg-primary/90 transition-colors"
+      >
+        Retry
+      </button>
+    </div>
+  );
+}
+
+function BlocksContent() {
   const [searchQuery, setSearchQuery] = useState("");
+  const { blocksByCategory } = useBlocks();
 
   const filteredCategories = useMemo(() => {
-    if (!searchQuery) return blocks.blocksByCategory;
+    if (!searchQuery) return blocksByCategory;
 
     const query = searchQuery.toLowerCase();
     const filtered: Record<string, GnuRadioBlock[]> = {};
 
-    Object.entries(blocks.blocksByCategory).forEach(
-      ([category, categoryBlocks]) => {
-        const matchingBlocks = categoryBlocks.filter(
-          (block) =>
-            block.label.toLowerCase().includes(query) ||
-            block.id.toLowerCase().includes(query)
-        );
+    Object.entries(blocksByCategory).forEach(([category, categoryBlocks]) => {
+      const matchingBlocks = categoryBlocks.filter(
+        (block) =>
+          block.label.toLowerCase().includes(query) ||
+          block.id.toLowerCase().includes(query)
+      );
 
-        if (matchingBlocks.length > 0) {
-          filtered[category] = matchingBlocks;
-        }
+      if (matchingBlocks.length > 0) {
+        filtered[category] = matchingBlocks;
       }
-    );
+    });
 
     return filtered;
-  }, [searchQuery]);
+  }, [searchQuery, blocksByCategory]);
 
   return (
     <div className="h-full w-full bg-background border-l flex flex-col overflow-hidden">
@@ -144,4 +185,27 @@ export function BlocksWindow() {
       </ScrollArea>
     </div>
   );
+}
+
+export function BlocksWindow() {
+  const { status, error, loadBlocks } = useBlocksStatus();
+
+  useEffect(() => {
+    loadBlocks();
+  }, [loadBlocks]);
+
+  const handleRetry = () => {
+    useBlocksStore.getState().reset();
+    loadBlocks();
+  };
+
+  if (status === "idle" || status === "loading") {
+    return <BlocksLoading />;
+  }
+
+  if (status === "error") {
+    return <BlocksError error={error || "Unknown error"} onRetry={handleRetry} />;
+  }
+
+  return <BlocksContent />;
 }
