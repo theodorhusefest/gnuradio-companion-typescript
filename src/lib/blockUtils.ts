@@ -16,11 +16,23 @@ export function buildParametersWithValues(
 
 /**
  * Extracts the block type from parameters
+ * If the type parameter has no default but has options, uses the first option
  */
 export function getBlockType(
   parameters: BlockParameter[]
 ): string | undefined {
-  return parameters.find((param) => param.id === "type")?.default?.toString();
+  const typeParam = parameters.find((param) => param.id === "type");
+  if (!typeParam) return undefined;
+
+  if (typeParam.default !== undefined) {
+    return typeParam.default.toString();
+  }
+
+  if (typeParam.options && typeParam.options.length > 0) {
+    return typeParam.options[0];
+  }
+
+  return undefined;
 }
 
 /**
