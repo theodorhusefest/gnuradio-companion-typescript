@@ -1,4 +1,5 @@
 import type { BlockPort } from "@/blocks/types";
+import type { GraphNode } from "@/types/graph";
 
 export const getPortHandleId = (
   port: BlockPort,
@@ -72,3 +73,74 @@ export const getPortColor = (
       return defaultColor;
   }
 };
+
+/**
+ * Gets the dtype of a specific port from a node by handle ID
+ * @param node - The graph node
+ * @param handleId - The handle ID of the port
+ * @param portType - Whether this is an input or output port
+ * @returns The dtype of the port, or undefined if not found
+ */
+export function getPortDTypeFromNode(
+  node: GraphNode | undefined,
+  handleId: string,
+  portType: "input" | "output"
+): string | undefined {
+  if (!node) return undefined;
+
+  const ports = portType === "input"
+    ? node.data.blockDefinition.inputs
+    : node.data.blockDefinition.outputs;
+
+  console.log("ports ", portType, ports)
+  if (!ports) return undefined;
+
+  // Find the port by matching handle ID
+  const port = ports.find((p, index) => {
+    const portHandleId = getPortHandleId(p, index, portType);
+    return portHandleId === handleId;
+  });
+
+  if (!port) return undefined;
+
+  // If port has dtype directly, return it
+  if (port.dtype) return port.dtype;
+
+  // Otherwise, check if block has a 'type' parameter (for parameterized blocks)
+  const typeParam = node.data.blockDefinition.parameters?.find((param) => param.id === "type");
+  if (!typeParam) return undefined;
+
+  if (typeParam.default !== undefined) {
+    return typeParam.default.toString();
+  }
+
+  if (typeParam.options && typeParam.options.length > 0) {
+    return typeParam.options[0];
+  }
+
+  return undefined;
+}
+
+/**
+ * Determines the edge color based on whether source and target port dtypes match
+ * @param sourceDType - The dtype of the source port
+ * @param targetDType - The dtype of the target port
+ * @returns Color string for the edge (red if mismatch, black if match or both undefined)
+ */
+export function getEdgeColorFromDTypes(
+  sourceDType: string | undefined,
+  targetDType: string | undefined
+): string {
+  // If both are undefined or one is undefined, consider it a match (use default color)
+  if (!sourceDType || !targetDType) {
+    return "#000";
+  }
+
+  // If dtypes don't match, use red
+  if (sourceDType !== targetDType) {
+    return "#ff0000";
+  }
+
+  // If dtypes match, use default black
+  return "#000";
+}
