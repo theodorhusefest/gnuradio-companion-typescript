@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import {getPortHandleId} from "../../src/lib/utils";
+import { getPortHandleId, getPorts } from "../../src/lib/portUtils";
 import type { BlockPort } from "../../src/blocks/types";
 
 describe("blockUtils", () => {
@@ -53,5 +53,48 @@ describe("blockUtils", () => {
       expect(getPortHandleId(port, 1, "output")).toBe("out1");
       expect(getPortHandleId(port, 3, "output")).toBe("out3");
     });
-  })
-})
+  });
+
+  describe("getPorts", () => {
+    it("should return empty array when ports is undefined", () => {
+      const result = getPorts(undefined, false);
+      expect(result).toEqual([]);
+    });
+
+    it("should return all ports when shouldShowPorts is true", () => {
+      const ports: BlockPort[] = [
+        { domain: "stream", dtype: "complex", optional: false },
+        { domain: "message", id: "msg", optional: true },
+      ];
+
+      const result = getPorts(ports, true);
+
+      expect(result).toHaveLength(2);
+    });
+
+    it("should filter out optional ports when shouldShowPorts is false", () => {
+      const ports: BlockPort[] = [
+        { domain: "stream", dtype: "complex", optional: false },
+        { domain: "message", id: "msg", optional: true },
+        { domain: "stream", dtype: "float" },
+      ];
+
+      const result = getPorts(ports, false);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].domain).toBe("stream");
+      expect(result[1].dtype).toBe("float");
+    });
+
+    it("should return all non-optional ports when shouldShowPorts is false", () => {
+      const ports: BlockPort[] = [
+        { domain: "stream", dtype: "complex" },
+        { domain: "stream", dtype: "float" },
+      ];
+
+      const result = getPorts(ports, false);
+
+      expect(result).toHaveLength(2);
+    });
+  });
+});
