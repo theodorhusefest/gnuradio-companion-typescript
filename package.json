@@ -13,10 +13,13 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "predev": "pnpm run parse-blocks",
-    "prebuild": "pnpm run parse-blocks"
+    "prebuild": "pnpm run parse-blocks",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@radix-ui/react-collapsible": "^1.1.12",
+    "@radix-ui/react-context-menu": "^2.2.16",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-scroll-area": "^1.2.10",
@@ -37,6 +40,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
+    "@playwright/test": "^1.57.0",
+    "@testing-library/react": "^16.3.1",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.6.0",
     "@types/react": "^19.1.16",

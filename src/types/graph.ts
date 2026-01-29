@@ -33,7 +33,7 @@ export type BlockInstanceData = {
   bus_sink?: boolean;
   bus_source?: boolean;
   bus_structure?: string | null;
-  rotation?: number;
+  rotation: number;
 };
 
 /**
