@@ -20,6 +20,7 @@ import { useGraphStore } from "@/stores/graphStore";
 import { useTemporalActions } from "@/stores/useTemporalStore";
 import type { GraphNode, GraphEdge, BlockInstanceData } from "@/types/graph";
 import { useTheme } from "./theme-provider";
+import { getPortDTypeFromNode, getEdgeColorFromDTypes } from "@/lib/portUtils";
 
 const fitViewOptions: FitViewOptions = {
   padding: 0.2,
@@ -93,21 +94,48 @@ function ReactFlowContent() {
     (connection) => {
       // Take snapshot before adding edge
       takeSnapshot();
-
       // Create edge with connection data
       const newEdge = xyflowAddEdge(connection, edges)[
         edges.length
       ] as GraphEdge;
       if (newEdge) {
-        // Add connection metadata
+        // Get source and target nodes
+        const sourceNode = nodes.find((n) => n.id === connection.source);
+        const targetNode = nodes.find((n) => n.id === connection.target);
+
+        // Get dtypes for source and target ports
+        const sourceDType = getPortDTypeFromNode(
+          sourceNode,
+          connection.sourceHandle || "0",
+          "output"
+        );
+        const targetDType = getPortDTypeFromNode(
+          targetNode,
+          connection.targetHandle || "0",
+          "input"
+        );
+
+        // Determine edge color based on dtype matching
+        const edgeColor = getEdgeColorFromDTypes(sourceDType, targetDType);
+
+        // Add connection metadata and styling
         newEdge.data = {
           sourcePort: connection.sourceHandle || "0",
           targetPort: connection.targetHandle || "0",
+          color: edgeColor,
+        };
+        newEdge.style = {
+          ...newEdge.style,
+          stroke: edgeColor,
+        };
+        newEdge.markerEnd = {
+          type: MarkerType.ArrowClosed,
+          color: edgeColor,
         };
         addEdge(newEdge);
       }
     },
-    [edges, addEdge, takeSnapshot]
+    [edges, nodes, addEdge, takeSnapshot]
   );
 
   const onNodeDragStart = useCallback(() => {
