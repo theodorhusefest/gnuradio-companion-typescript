@@ -16,7 +16,7 @@ const Port = ({ port, portId, type, blockDType }: Props) => {
   return (
     <Handle
       type={isInput ? "target" : "source"}
-      position={type === "input" ? Position.Left : Position.Right}
+      position={isInput ? Position.Left : Position.Right}
       id={portId}
       style={{ position: "static", background: "transparent" }}
     >
