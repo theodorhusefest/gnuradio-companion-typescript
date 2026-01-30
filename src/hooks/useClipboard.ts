@@ -5,12 +5,12 @@
  * Works with React Flow's selection state and the graph store
  */
 
-import { useCallback } from "react";
-import { useReactFlow } from "@xyflow/react";
-import { useGraphStore } from "@/stores/graphStore";
 import { useClipboardStore } from "@/stores/clipboardStore";
+import { useGraphStore } from "@/stores/graphStore";
 import { useTemporalActions } from "@/stores/useTemporalStore";
-import type { GraphNode, GraphEdge } from "@/types/graph";
+import type { GraphEdge, GraphNode } from "@/types/graph";
+import { useReactFlow } from "@xyflow/react";
+import { useCallback } from "react";
 
 // Simple ID generator for pasted nodes
 let pasteIdCounter = 0;
@@ -43,7 +43,7 @@ export function useClipboard() {
     // Get edges where both source AND target are in selected nodes (internal edges only)
     const selectedEdges = edges.filter(
       (edge) =>
-        selectedNodeIds.has(edge.source) && selectedNodeIds.has(edge.target)
+        selectedNodeIds.has(edge.source) && selectedNodeIds.has(edge.target),
     );
 
     // Store in clipboard (deep copy to prevent mutation issues)
@@ -119,12 +119,12 @@ export function useClipboard() {
 
     // Get selected node IDs
     const selectedNodeIds = new Set(
-      nodes.filter((node) => node.selected).map((node) => node.id)
+      nodes.filter((node) => node.selected).map((node) => node.id),
     );
 
     // Get selected edge IDs
     const selectedEdgeIds = new Set(
-      edges.filter((edge) => edge.selected).map((edge) => edge.id)
+      edges.filter((edge) => edge.selected).map((edge) => edge.id),
     );
 
     if (selectedNodeIds.size === 0 && selectedEdgeIds.size === 0) return;
@@ -133,14 +133,16 @@ export function useClipboard() {
     takeSnapshot();
 
     // Remove selected nodes
-    const remainingNodes = nodes.filter((node) => !selectedNodeIds.has(node.id));
+    const remainingNodes = nodes.filter(
+      (node) => !selectedNodeIds.has(node.id),
+    );
 
     // Remove selected edges AND edges connected to deleted nodes
     const remainingEdges = edges.filter(
       (edge) =>
         !selectedEdgeIds.has(edge.id) &&
         !selectedNodeIds.has(edge.source) &&
-        !selectedNodeIds.has(edge.target)
+        !selectedNodeIds.has(edge.target),
     );
 
     setNodes(remainingNodes);
@@ -179,7 +181,7 @@ export function useClipboard() {
     const selectedNodeIds = new Set(selectedNodes.map((node) => node.id));
     const selectedEdges = edges.filter(
       (edge) =>
-        selectedNodeIds.has(edge.source) && selectedNodeIds.has(edge.target)
+        selectedNodeIds.has(edge.source) && selectedNodeIds.has(edge.target),
     );
 
     // Copy to clipboard
@@ -193,15 +195,17 @@ export function useClipboard() {
 
     // Get selected edge IDs too
     const selectedEdgeIds = new Set(
-      edges.filter((edge) => edge.selected).map((edge) => edge.id)
+      edges.filter((edge) => edge.selected).map((edge) => edge.id),
     );
 
-    const remainingNodes = nodes.filter((node) => !selectedNodeIds.has(node.id));
+    const remainingNodes = nodes.filter(
+      (node) => !selectedNodeIds.has(node.id),
+    );
     const remainingEdges = edges.filter(
       (edge) =>
         !selectedEdgeIds.has(edge.id) &&
         !selectedNodeIds.has(edge.source) &&
-        !selectedNodeIds.has(edge.target)
+        !selectedNodeIds.has(edge.target),
     );
 
     setNodes(remainingNodes);

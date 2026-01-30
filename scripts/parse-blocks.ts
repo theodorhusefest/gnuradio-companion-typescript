@@ -5,27 +5,31 @@
  * This script scans the GNU Radio block directories and parses all .block.yml files
  * to generate TypeScript types and a blocks.json file for the application.
  */
-import * as fs from 'fs';
-import * as path from 'path';
-import * as yaml from 'js-yaml';
-import type { GnuRadioBlock, BlocksData, BlocksByCategory } from '../src/types/blocks.js';
-import os from "os"
+import * as fs from "fs";
+import * as yaml from "js-yaml";
+import os from "os";
+import * as path from "path";
+import type {
+  BlocksByCategory,
+  BlocksData,
+  GnuRadioBlock,
+} from "../src/types/blocks.js";
 
 // Configuration
-function getGnuRadioPackagePath(){
-  const platform = os.platform()
-  switch (platform){
+function getGnuRadioPackagePath() {
+  const platform = os.platform();
+  switch (platform) {
     case "darwin":
-      return '/opt/homebrew/share/gnuradio/grc/blocks'
+      return "/opt/homebrew/share/gnuradio/grc/blocks";
     case "linux":
-      return '/usr/share/gnuradio/grc/blocks'
+      return "/usr/share/gnuradio/grc/blocks";
     default:
-      throw new Error("Gnu-Radio path not implemented for this OS")
+      throw new Error("Gnu-Radio path not implemented for this OS");
   }
-} 
+}
 const BLOCK_PATHS = [
-  getGnuRadioPackagePath(), 
-  path.join(process.env.HOME || '', '.local/state/gnuradio'),
+  getGnuRadioPackagePath(),
+  path.join(process.env.HOME || "", ".local/state/gnuradio"),
 ];
 
 const OUTPUT_DIR = path.join(process.cwd(), "src", "blocks");

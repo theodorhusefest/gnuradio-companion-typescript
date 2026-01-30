@@ -1,7 +1,7 @@
-import type { BlockPort } from "@/types/blocks";
 import { getPortHandleId } from "@/lib/portUtils";
-import Port from "./Port";
+import type { BlockPort } from "@/types/blocks";
 import { Position } from "@xyflow/react";
+import Port from "./Port";
 
 interface PortsContainerProps {
   ports: BlockPort[];
@@ -10,13 +10,22 @@ interface PortsContainerProps {
   position: Position;
 }
 
-const PortsContainer = ({ ports, type, blockDType, position }: PortsContainerProps) => {
+const PortsContainer = ({
+  ports,
+  type,
+  blockDType,
+  position,
+}: PortsContainerProps) => {
   // Position and layout based on handle position (adapts to rotation)
   const containerClass = {
-    [Position.Left]: "absolute -left-12 top-0 flex flex-col justify-around h-full",
-    [Position.Right]: "absolute -right-12 top-0 flex flex-col justify-around h-full",
-    [Position.Top]: "absolute -top-4 left-0 flex flex-row justify-around w-full",
-    [Position.Bottom]: "absolute -bottom-4 left-0 flex flex-row justify-around w-full",
+    [Position.Left]:
+      "absolute -left-12 top-0 flex flex-col justify-around h-full",
+    [Position.Right]:
+      "absolute -right-12 top-0 flex flex-col justify-around h-full",
+    [Position.Top]:
+      "absolute -top-4 left-0 flex flex-row justify-around w-full",
+    [Position.Bottom]:
+      "absolute -bottom-4 left-0 flex flex-row justify-around w-full",
   }[position];
 
   return (

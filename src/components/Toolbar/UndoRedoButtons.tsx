@@ -1,11 +1,11 @@
+import { ButtonGroup } from "@/components/ui/button-group";
+import { useGraphStore } from "@/stores/graphStore";
 import {
   useTemporalActions,
   useTemporalStore,
 } from "@/stores/useTemporalStore";
-import { ButtonGroup } from "@/components/ui/button-group";
-import { Button } from "../ui/button";
 import { Redo2, Trash, Undo2 } from "lucide-react";
-import { useGraphStore } from "@/stores/graphStore";
+import { Button } from "../ui/button";
 
 const UndoRedoButtons = () => {
   const { past, future } = useTemporalStore();

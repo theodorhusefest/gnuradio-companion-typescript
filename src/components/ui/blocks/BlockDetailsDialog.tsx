@@ -1,11 +1,11 @@
 import type { BlockParameter } from "@/blocks/types";
 import {
   Dialog,
-  DialogHeader,
-  DialogTitle,
+  DialogClose,
   DialogContent,
   DialogFooter,
-  DialogClose,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "../button";
 

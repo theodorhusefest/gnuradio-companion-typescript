@@ -1,6 +1,20 @@
 import type { GnuRadioBlock } from "@/blocks/types";
 import {
-  addEdge as xyflowAddEdge,
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import { useTheme } from "@/hooks/use-theme";
+import { useClipboard } from "@/hooks/useClipboard";
+import { getEdgeColorFromDTypes, getPortDTypeFromNode } from "@/lib/portUtils";
+import { useClipboardStore } from "@/stores/clipboardStore";
+import { useGraphStore } from "@/stores/graphStore";
+import { useTemporalActions } from "@/stores/useTemporalStore";
+import type { BlockInstanceData, GraphEdge, GraphNode } from "@/types/graph";
+import {
   applyEdgeChanges,
   applyNodeChanges,
   Background,
@@ -9,29 +23,22 @@ import {
   ReactFlow,
   ReactFlowProvider,
   useReactFlow,
+  addEdge as xyflowAddEdge,
   type FitViewOptions,
   type OnConnect,
   type OnEdgesChange,
   type OnNodesChange,
 } from "@xyflow/react";
+import {
+  Clipboard,
+  ClipboardCopy,
+  RotateCcw,
+  RotateCw,
+  Scissors,
+  Trash2,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, type DragEvent } from "react";
 import BlockNode from "./ui/blocks/BlockNode";
-import { useGraphStore } from "@/stores/graphStore";
-import { useTemporalActions } from "@/stores/useTemporalStore";
-import { useClipboardStore } from "@/stores/clipboardStore";
-import { useClipboard } from "@/hooks/useClipboard";
-import type { GraphNode, GraphEdge, BlockInstanceData } from "@/types/graph";
-import { useTheme } from "@/hooks/use-theme";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuShortcut,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import { getPortDTypeFromNode, getEdgeColorFromDTypes } from "@/lib/portUtils";
-import { Clipboard, ClipboardCopy, RotateCcw, RotateCw, Scissors, Trash2 } from "lucide-react";
 
 const fitViewOptions: FitViewOptions = {
   padding: 0.2,
@@ -77,7 +84,9 @@ function ReactFlowContent() {
 
   // Check if there's a selection
   const hasSelection = useMemo(() => {
-    return nodes.some((node) => node.selected) || edges.some((edge) => edge.selected);
+    return (
+      nodes.some((node) => node.selected) || edges.some((edge) => edge.selected)
+    );
   }, [nodes, edges]);
 
   // Check if clipboard has content
@@ -98,7 +107,7 @@ function ReactFlowContent() {
         updateNode(node.id, { rotation: newRotation });
       });
     },
-    [nodes, updateNode, takeSnapshot]
+    [nodes, updateNode, takeSnapshot],
   );
 
   // Keyboard shortcuts for clipboard operations
@@ -126,7 +135,10 @@ function ReactFlowContent() {
       }
 
       // Delete: Delete or Backspace (without modifier)
-      if (!isModifier && (event.key === "Delete" || event.key === "Backspace")) {
+      if (
+        !isModifier &&
+        (event.key === "Delete" || event.key === "Backspace")
+      ) {
         // Only handle if not typing in an input field
         const target = event.target as HTMLElement;
         if (target.tagName !== "INPUT" && target.tagName !== "TEXTAREA") {
@@ -159,7 +171,7 @@ function ReactFlowContent() {
   const onNodesChange: OnNodesChange = useCallback(
     (changes) => {
       const hasSignificantChange = changes.some(
-        (change) => change.type === "remove" || change.type === "add"
+        (change) => change.type === "remove" || change.type === "add",
       );
       if (hasSignificantChange) {
         takeSnapshot();
@@ -168,14 +180,14 @@ function ReactFlowContent() {
       const updatedNodes = applyNodeChanges(changes, nodes);
       setNodes(updatedNodes as GraphNode[]);
     },
-    [nodes, setNodes, takeSnapshot]
+    [nodes, setNodes, takeSnapshot],
   );
 
   const onEdgesChange: OnEdgesChange = useCallback(
     (changes) => {
       // Take snapshot before edge changes
       const hasSignificantChange = changes.some(
-        (change) => change.type === "remove" || change.type === "add"
+        (change) => change.type === "remove" || change.type === "add",
       );
       if (hasSignificantChange) {
         takeSnapshot();
@@ -185,7 +197,7 @@ function ReactFlowContent() {
       const updatedEdges = applyEdgeChanges(changes, edges);
       setEdges(updatedEdges as GraphEdge[]);
     },
-    [edges, setEdges, takeSnapshot]
+    [edges, setEdges, takeSnapshot],
   );
 
   const onConnect: OnConnect = useCallback(
@@ -205,12 +217,12 @@ function ReactFlowContent() {
         const sourceDType = getPortDTypeFromNode(
           sourceNode,
           connection.sourceHandle || "0",
-          "output"
+          "output",
         );
         const targetDType = getPortDTypeFromNode(
           targetNode,
           connection.targetHandle || "0",
-          "input"
+          "input",
         );
 
         // Determine edge color based on dtype matching
@@ -233,7 +245,7 @@ function ReactFlowContent() {
         addEdge(newEdge);
       }
     },
-    [edges, nodes, addEdge, takeSnapshot]
+    [edges, nodes, addEdge, takeSnapshot],
   );
 
   const onNodeDragStart = useCallback(() => {
@@ -253,7 +265,7 @@ function ReactFlowContent() {
 
       // Get the block data from the drag event
       const blockDataString = event.dataTransfer.getData(
-        "application/gnuradio-block"
+        "application/gnuradio-block",
       );
       if (!blockDataString) return;
 
@@ -300,7 +312,7 @@ function ReactFlowContent() {
       // Add to store
       setNodes([...nodes, newNode]);
     },
-    [screenToFlowPosition, nodes, setNodes, takeSnapshot]
+    [screenToFlowPosition, nodes, setNodes, takeSnapshot],
   );
 
   return (
@@ -344,12 +356,18 @@ function ReactFlowContent() {
           <ContextMenuShortcut>{isMac ? "⌘V" : "Ctrl+V"}</ContextMenuShortcut>
         </ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem onClick={() => rotateSelected(90)} disabled={!hasSelection}>
+        <ContextMenuItem
+          onClick={() => rotateSelected(90)}
+          disabled={!hasSelection}
+        >
           <RotateCw className="mr-2 h-4 w-4" />
           Rotate Clockwise
           <ContextMenuShortcut>R</ContextMenuShortcut>
         </ContextMenuItem>
-        <ContextMenuItem onClick={() => rotateSelected(-90)} disabled={!hasSelection}>
+        <ContextMenuItem
+          onClick={() => rotateSelected(-90)}
+          disabled={!hasSelection}
+        >
           <RotateCcw className="mr-2 h-4 w-4" />
           Rotate Counterclockwise
           <ContextMenuShortcut>⇧R</ContextMenuShortcut>

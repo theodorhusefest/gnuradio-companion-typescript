@@ -118,7 +118,7 @@ describe("parse-blocks", () => {
     it("should return null for invalid block file (missing required fields)", () => {
       const invalidBlockPath = path.join(
         fixturesPath,
-        "invalid_block.block.yml"
+        "invalid_block.block.yml",
       );
       const block = parseBlockFile(invalidBlockPath);
 
@@ -136,7 +136,7 @@ describe("parse-blocks", () => {
       const nestedBlockPath = path.join(
         fixturesPath,
         "subfolder",
-        "nested_block.block.yml"
+        "nested_block.block.yml",
       );
       const block = parseBlockFile(nestedBlockPath);
 
@@ -154,10 +154,10 @@ describe("parse-blocks", () => {
       expect(files).toHaveLength(3);
       expect(files.some((f) => f.endsWith("valid_block.block.yml"))).toBe(true);
       expect(files.some((f) => f.endsWith("invalid_block.block.yml"))).toBe(
-        true
+        true,
       );
       expect(files.some((f) => f.endsWith("nested_block.block.yml"))).toBe(
-        true
+        true,
       );
     });
 

@@ -1,21 +1,27 @@
-import { Position, type NodeProps, useUpdateNodeInternals } from "@xyflow/react";
-import { useState, useEffect } from "react";
-import BlockDetailsDialog from "./BlockDetailsDialog";
-import ParametersDisplay from "./ParametersDisplay";
-import PortsContainer from "./PortsContainer";
+import {
+  buildParametersWithValues,
+  calculateNodeHeight,
+  getPortDType,
+  getShouldShowPorts,
+} from "@/lib/blockUtils";
+import { getPorts } from "@/lib/portUtils";
 import { useGraphStore } from "@/stores/graphStore";
 import { useTemporalActions } from "@/stores/useTemporalStore";
 import type { GraphNode } from "@/types/graph";
-import { getPorts } from "@/lib/portUtils";
 import {
-  buildParametersWithValues,
-  getPortDType,
-  getShouldShowPorts,
-  calculateNodeHeight,
-} from "@/lib/blockUtils";
+  Position,
+  useUpdateNodeInternals,
+  type NodeProps,
+} from "@xyflow/react";
+import { useEffect, useState } from "react";
+import BlockDetailsDialog from "./BlockDetailsDialog";
+import ParametersDisplay from "./ParametersDisplay";
+import PortsContainer from "./PortsContainer";
 
 // Map rotation to handle positions
-const getHandlePositions = (rotation: number): { input: Position; output: Position } => {
+const getHandlePositions = (
+  rotation: number,
+): { input: Position; output: Position } => {
   switch (rotation) {
     case 90:
       return { input: Position.Top, output: Position.Bottom };
@@ -42,7 +48,8 @@ const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
     updateNodeInternals(id);
   }, [rotation, id, updateNodeInternals]);
 
-  const { input: inputPosition, output: outputPosition } = getHandlePositions(rotation);
+  const { input: inputPosition, output: outputPosition } =
+    getHandlePositions(rotation);
 
   const isDeprecated = blockDefinition.flags?.includes("deprecated");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -50,7 +57,7 @@ const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
   const currentParameters = data.parameters || {};
   const allParameters = buildParametersWithValues(
     blockDefinition.parameters,
-    currentParameters
+    currentParameters,
   );
 
   const portDType = getPortDType(allParameters);
@@ -62,7 +69,6 @@ const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
     updateNodeInternals(id);
   }, [id, inputs.length, outputs.length, updateNodeInternals]);
 
-
   useEffect(() => {
     updateNodeInternals(id);
   }, [id, inputs.length, outputs.length, updateNodeInternals]);
@@ -70,7 +76,7 @@ const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
   const displayParameters = allParameters.filter((param) => !param.hide);
 
   const handleParametersUpdate = (
-    updates: Record<string, string | number | boolean>
+    updates: Record<string, string | number | boolean>,
   ) => {
     takeSnapshot();
     updateNode(id, {
@@ -121,19 +127,17 @@ const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
           blockDType={portDType}
           position={outputPosition}
         />
-      </div >
+      </div>
 
-      {
-        allParameters.length > 0 && (
-          <BlockDetailsDialog
-            open={dialogOpen}
-            onOpenChange={setDialogOpen}
-            parameters={allParameters}
-            nodeId={id}
-            onSave={handleParametersUpdate}
-          />
-        )
-      }
+      {allParameters.length > 0 && (
+        <BlockDetailsDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          parameters={allParameters}
+          nodeId={id}
+          onSave={handleParametersUpdate}
+        />
+      )}
     </>
   );
 };

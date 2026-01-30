@@ -5,8 +5,8 @@
  * This is the source of truth for the graph editor
  */
 
-import { create } from 'zustand';
-import type { GraphState, GraphNode, GraphEdge } from '../types/graph';
+import { create } from "zustand";
+import type { GraphEdge, GraphNode, GraphState } from "../types/graph";
 
 export const useGraphStore = create<GraphState>((set) => ({
   // Initial state
@@ -20,12 +20,10 @@ export const useGraphStore = create<GraphState>((set) => ({
     }));
   },
 
-  updateNode: (id: string, data: Partial<GraphNode['data']>) => {
+  updateNode: (id: string, data: Partial<GraphNode["data"]>) => {
     set((state) => ({
       nodes: state.nodes.map((node) =>
-        node.id === id
-          ? { ...node, data: { ...node.data, ...data } }
-          : node
+        node.id === id ? { ...node, data: { ...node.data, ...data } } : node,
       ),
     }));
   },
@@ -68,7 +66,7 @@ export const useGraphStore = create<GraphState>((set) => ({
       return {
         nodes: state.nodes.filter((node) => node.id !== nodeId),
         edges: state.edges.filter(
-          (edge) => !connectedEdgeIds.includes(edge.id)
+          (edge) => !connectedEdgeIds.includes(edge.id),
         ),
       };
     });

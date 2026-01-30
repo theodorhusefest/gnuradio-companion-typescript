@@ -1,4 +1,4 @@
-import { test, expect, Page } from "@playwright/test";
+import { expect, Page, test } from "@playwright/test";
 
 async function addBlockToCanvas(page: Page) {
   const canvas = page.locator(".react-flow");
@@ -57,8 +57,12 @@ test.describe("Rotation functionality", () => {
     const canvas = page.locator(".react-flow");
     await canvas.click({ button: "right" });
 
-    await expect(page.getByRole("menuitem", { name: /Rotate Clockwise/ })).toBeVisible();
-    await expect(page.getByRole("menuitem", { name: /Rotate Counterclockwise/ })).toBeVisible();
+    await expect(
+      page.getByRole("menuitem", { name: /Rotate Clockwise/ }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("menuitem", { name: /Rotate Counterclockwise/ }),
+    ).toBeVisible();
   });
 
   test("should rotate via toolbar buttons", async ({ page }) => {
@@ -68,7 +72,9 @@ test.describe("Rotation functionality", () => {
     await node.click();
 
     // Click clockwise rotation button in toolbar
-    const rotateClockwiseBtn = page.locator("button").filter({ has: page.locator("svg.lucide-rotate-cw") });
+    const rotateClockwiseBtn = page
+      .locator("button")
+      .filter({ has: page.locator("svg.lucide-rotate-cw") });
     await rotateClockwiseBtn.click();
 
     // After 90° rotation, input handle should be on top

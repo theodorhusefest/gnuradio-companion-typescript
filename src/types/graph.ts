@@ -5,7 +5,7 @@
  * Extends XyFlow types with GNU Radio block data
  */
 
-import type { Node, Edge } from "@xyflow/react";
+import type { Edge, Node } from "@xyflow/react";
 import type { GnuRadioBlock } from "./blocks";
 
 /**
