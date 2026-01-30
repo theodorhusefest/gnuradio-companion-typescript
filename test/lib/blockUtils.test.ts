@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
   buildParametersWithValues,
-  getBlockType,
   getShouldShowPorts,
   calculateNodeHeight,
 } from '../../src/lib/blockUtils'
@@ -42,39 +41,6 @@ describe('blockUtils', () => {
       const result = buildParametersWithValues(blockParameters, currentValues)
 
       expect(result[0].default).toBe('complex')
-    })
-  })
-
-  describe('getBlockType', () => {
-    it('should return the type parameter value as string', () => {
-      const parameters: BlockParameter[] = [
-        { id: 'freq', label: 'Frequency', dtype: 'real', default: 1000 },
-        { id: 'type', label: 'Type', dtype: 'enum', default: 'complex' },
-      ]
-
-      const result = getBlockType(parameters)
-
-      expect(result).toBe('complex')
-    })
-
-    it('should return undefined when type parameter is not present', () => {
-      const parameters: BlockParameter[] = [
-        { id: 'freq', label: 'Frequency', dtype: 'real', default: 1000 },
-      ]
-
-      const result = getBlockType(parameters)
-
-      expect(result).toBeUndefined()
-    })
-
-    it('should convert numeric type values to string', () => {
-      const parameters: BlockParameter[] = [
-        { id: 'type', label: 'Type', dtype: 'int', default: 42 },
-      ]
-
-      const result = getBlockType(parameters)
-
-      expect(result).toBe('42')
     })
   })
 
