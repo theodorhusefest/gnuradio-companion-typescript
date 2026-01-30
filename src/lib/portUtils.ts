@@ -92,7 +92,6 @@ export function getPortDTypeFromNode(
     ? node.data.blockDefinition.inputs
     : node.data.blockDefinition.outputs;
 
-  console.log("ports ", portType, ports)
   if (!ports) return undefined;
 
   // Find the port by matching handle ID
@@ -104,7 +103,7 @@ export function getPortDTypeFromNode(
   if (!port) return undefined;
 
   // If port has dtype directly, return it
-  if (port.dtype) return port.dtype;
+  if (port.dtype && port.dtype !== "${ type }") return port.dtype;
 
   // Otherwise, check if block has a 'type' parameter (for parameterized blocks)
   const typeParam = node.data.blockDefinition.parameters?.find((param) => param.id === "type");
@@ -125,22 +124,24 @@ export function getPortDTypeFromNode(
  * Determines the edge color based on whether source and target port dtypes match
  * @param sourceDType - The dtype of the source port
  * @param targetDType - The dtype of the target port
- * @returns Color string for the edge (red if mismatch, black if match or both undefined)
+ * @returns CSS variable for the edge color (destructive if mismatch, foreground if match or both undefined)
  */
 export function getEdgeColorFromDTypes(
   sourceDType: string | undefined,
-  targetDType: string | undefined
+  targetDType: string | undefined,
 ): string {
   // If both are undefined or one is undefined, consider it a match (use default color)
+
+  console.log({sourceDType, targetDType})
   if (!sourceDType || !targetDType) {
-    return "#000";
+    return "var(--foreground)";
   }
 
-  // If dtypes don't match, use red
+  // If dtypes don't match, use destructive color
   if (sourceDType !== targetDType) {
-    return "#ff0000";
+    return "var(--destructive)";
   }
 
-  // If dtypes match, use default black
-  return "#000";
+  // If dtypes match, use foreground color
+  return "var(--foreground)";
 }
