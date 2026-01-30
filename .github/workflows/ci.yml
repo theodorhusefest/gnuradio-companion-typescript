@@ -36,7 +36,7 @@ jobs:
 
       - name: Run unit tests
         run: pnpm test
-      
+
   e2e:
     runs-on: ubuntu-latest
 

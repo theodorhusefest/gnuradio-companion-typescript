@@ -1,54 +1,50 @@
-import { BlocksWindow } from "@/components/BlocksWindow";
-import { DetailsWindow } from "@/components/DetailsWindow";
-import { ReactFlowWindow } from "@/components/ReactFlowWindow";
-import Toolbar from "@/components/Toolbar";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import { useEffect } from "react";
-import { useTemporalActions } from "@/stores/useTemporalStore";
+import { BlocksWindow } from '@/components/BlocksWindow'
+import { DetailsWindow } from '@/components/DetailsWindow'
+import { ReactFlowWindow } from '@/components/ReactFlowWindow'
+import Toolbar from '@/components/Toolbar'
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
+import { useEffect } from 'react'
+import { useTemporalActions } from '@/stores/useTemporalStore'
 
 function App() {
-  const { undo, redo } = useTemporalActions();
+  const { undo, redo } = useTemporalActions()
 
   // Global keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Check for Cmd (Mac) or Ctrl (Windows/Linux)
-      const isModifier = event.metaKey || event.ctrlKey;
+      const isModifier = event.metaKey || event.ctrlKey
 
-      if (!isModifier) return;
+      if (!isModifier) return
 
       // Undo: Cmd/Ctrl + Z (without Shift)
-      if (event.key === "z" && !event.shiftKey) {
-        event.preventDefault();
-        undo();
-        console.log("Undo triggered");
+      if (event.key === 'z' && !event.shiftKey) {
+        event.preventDefault()
+        undo()
+        console.log('Undo triggered')
       }
 
       // Redo: Cmd/Ctrl + Shift + Z
-      if (event.key === "z" && event.shiftKey) {
-        event.preventDefault();
-        redo();
-        console.log("Redo triggered");
+      if (event.key === 'z' && event.shiftKey) {
+        event.preventDefault()
+        redo()
+        console.log('Redo triggered')
       }
 
       // Alternative Redo: Cmd/Ctrl + Y
-      if (event.key === "y") {
-        event.preventDefault();
-        redo();
-        console.log("Redo triggered (Ctrl+Y)");
+      if (event.key === 'y') {
+        event.preventDefault()
+        redo()
+        console.log('Redo triggered (Ctrl+Y)')
       }
-    };
+    }
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown)
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [undo, redo]);
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [undo, redo])
   return (
     <div className="h-screen w-screen flex flex-col">
       <Toolbar />
@@ -72,7 +68,7 @@ function App() {
         </ResizablePanelGroup>
       </div>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App

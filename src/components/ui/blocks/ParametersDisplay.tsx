@@ -1,12 +1,12 @@
-import type { BlockParameter } from "@/types/blocks";
-import { Separator } from "../separator";
+import type { BlockParameter } from '@/types/blocks'
+import { Separator } from '../separator'
 
 interface ParametersDisplayProps {
-  parameters: BlockParameter[];
+  parameters: BlockParameter[]
 }
 
 const ParametersDisplay = ({ parameters }: ParametersDisplayProps) => {
-  if (parameters.length === 0) return null;
+  if (parameters.length === 0) return null
 
   return (
     <div className="space-y-2">
@@ -20,7 +20,7 @@ const ParametersDisplay = ({ parameters }: ParametersDisplayProps) => {
         </div>
       ))}
     </div>
-  );
-};
+  )
+}
 
-export default ParametersDisplay;
+export default ParametersDisplay

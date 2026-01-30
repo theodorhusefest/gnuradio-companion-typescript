@@ -1,4 +1,4 @@
-import type { GnuRadioBlock } from "@/blocks/types";
+import type { GnuRadioBlock } from '@/blocks/types'
 import {
   addEdge as xyflowAddEdge,
   applyEdgeChanges,
@@ -13,15 +13,15 @@ import {
   type OnConnect,
   type OnEdgesChange,
   type OnNodesChange,
-} from "@xyflow/react";
-import { useCallback, useEffect, useMemo, useRef, type DragEvent } from "react";
-import BlockNode from "./ui/blocks/BlockNode";
-import { useGraphStore } from "@/stores/graphStore";
-import { useTemporalActions } from "@/stores/useTemporalStore";
-import { useClipboardStore } from "@/stores/clipboardStore";
-import { useClipboard } from "@/hooks/useClipboard";
-import type { GraphNode, GraphEdge, BlockInstanceData } from "@/types/graph";
-import { useTheme } from "@/hooks/use-theme";
+} from '@xyflow/react'
+import { useCallback, useEffect, useMemo, useRef, type DragEvent } from 'react'
+import BlockNode from './ui/blocks/BlockNode'
+import { useGraphStore } from '@/stores/graphStore'
+import { useTemporalActions } from '@/stores/useTemporalStore'
+import { useClipboardStore } from '@/stores/clipboardStore'
+import { useClipboard } from '@/hooks/useClipboard'
+import type { GraphNode, GraphEdge, BlockInstanceData } from '@/types/graph'
+import { useTheme } from '@/hooks/use-theme'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -29,252 +29,246 @@ import {
   ContextMenuSeparator,
   ContextMenuShortcut,
   ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import { getPortDTypeFromNode, getEdgeColorFromDTypes } from "@/lib/portUtils";
-import { Clipboard, ClipboardCopy, RotateCcw, RotateCw, Scissors, Trash2 } from "lucide-react";
+} from '@/components/ui/context-menu'
+import { getPortDTypeFromNode, getEdgeColorFromDTypes } from '@/lib/portUtils'
+import { Clipboard, ClipboardCopy, RotateCcw, RotateCw, Scissors, Trash2 } from 'lucide-react'
 
 const fitViewOptions: FitViewOptions = {
   padding: 0.2,
-};
+}
 
-let nodeId = 0;
-const getNodeId = () => `node_${nodeId++}`;
+let nodeId = 0
+const getNodeId = () => `node_${nodeId++}`
 
 const nodeTypes = {
   block: BlockNode,
   gnuradioBlock: BlockNode, // Keep for backward compatibility
-};
+}
 
 const defaultEdgeOptions = {
-  markerEnd: { type: MarkerType.ArrowClosed, color: "var(--foreground)" },
-  style: { strokeWidth: 3, stroke: "var(--foreground)" },
-};
+  markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--foreground)' },
+  style: { strokeWidth: 3, stroke: 'var(--foreground)' },
+}
 
 const connectionLineStyle = {
   strokeWidth: 3,
-  stroke: "var(--foreground)",
-};
+  stroke: 'var(--foreground)',
+}
 
 // Detect if user is on Mac for keyboard shortcut display
-const isMac =
-  typeof navigator !== "undefined" &&
-  /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform)
 
 function ReactFlowContent() {
   // Use Zustand stores instead of local state
-  const { theme } = useTheme();
+  const { theme } = useTheme()
 
-  const nodes = useGraphStore((state) => state.nodes);
-  const edges = useGraphStore((state) => state.edges);
-  const setNodes = useGraphStore((state) => state.setNodes);
-  const setEdges = useGraphStore((state) => state.setEdges);
-  const addEdge = useGraphStore((state) => state.addEdge);
-  const { takeSnapshot } = useTemporalActions();
+  const nodes = useGraphStore((state) => state.nodes)
+  const edges = useGraphStore((state) => state.edges)
+  const setNodes = useGraphStore((state) => state.setNodes)
+  const setEdges = useGraphStore((state) => state.setEdges)
+  const addEdge = useGraphStore((state) => state.addEdge)
+  const { takeSnapshot } = useTemporalActions()
 
   // Clipboard functionality
-  const clipboard = useClipboardStore((state) => state.clipboard);
-  const { copy, cut, paste, deleteSelected } = useClipboard();
+  const clipboard = useClipboardStore((state) => state.clipboard)
+  const { copy, cut, paste, deleteSelected } = useClipboard()
 
   // Check if there's a selection
   const hasSelection = useMemo(() => {
-    return nodes.some((node) => node.selected) || edges.some((edge) => edge.selected);
-  }, [nodes, edges]);
+    return nodes.some((node) => node.selected) || edges.some((edge) => edge.selected)
+  }, [nodes, edges])
 
   // Check if clipboard has content
-  const hasClipboard = clipboard !== null && clipboard.nodes.length > 0;
+  const hasClipboard = clipboard !== null && clipboard.nodes.length > 0
 
   // Rotation functionality
-  const updateNode = useGraphStore((state) => state.updateNode);
+  const updateNode = useGraphStore((state) => state.updateNode)
 
   const rotateSelected = useCallback(
     (angle: number) => {
-      const selectedNodes = nodes.filter((node) => node.selected);
-      if (selectedNodes.length === 0) return;
+      const selectedNodes = nodes.filter((node) => node.selected)
+      if (selectedNodes.length === 0) return
 
-      takeSnapshot();
+      takeSnapshot()
       selectedNodes.forEach((node) => {
-        const currentRotation = node.data.rotation || 0;
-        const newRotation = (currentRotation + angle + 360) % 360;
-        updateNode(node.id, { rotation: newRotation });
-      });
+        const currentRotation = node.data.rotation || 0
+        const newRotation = (currentRotation + angle + 360) % 360
+        updateNode(node.id, { rotation: newRotation })
+      })
     },
     [nodes, updateNode, takeSnapshot]
-  );
+  )
 
   // Keyboard shortcuts for clipboard operations
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Check for Cmd (Mac) or Ctrl (Windows/Linux)
-      const isModifier = event.metaKey || event.ctrlKey;
+      const isModifier = event.metaKey || event.ctrlKey
 
       // Copy: Cmd/Ctrl + C
-      if (isModifier && event.key === "c") {
-        event.preventDefault();
-        copy();
+      if (isModifier && event.key === 'c') {
+        event.preventDefault()
+        copy()
       }
 
       // Cut: Cmd/Ctrl + X
-      if (isModifier && event.key === "x") {
-        event.preventDefault();
-        cut();
+      if (isModifier && event.key === 'x') {
+        event.preventDefault()
+        cut()
       }
 
       // Paste: Cmd/Ctrl + V
-      if (isModifier && event.key === "v") {
-        event.preventDefault();
-        paste();
+      if (isModifier && event.key === 'v') {
+        event.preventDefault()
+        paste()
       }
 
       // Delete: Delete or Backspace (without modifier)
-      if (!isModifier && (event.key === "Delete" || event.key === "Backspace")) {
+      if (!isModifier && (event.key === 'Delete' || event.key === 'Backspace')) {
         // Only handle if not typing in an input field
-        const target = event.target as HTMLElement;
-        if (target.tagName !== "INPUT" && target.tagName !== "TEXTAREA") {
-          event.preventDefault();
-          deleteSelected();
+        const target = event.target as HTMLElement
+        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+          event.preventDefault()
+          deleteSelected()
         }
       }
 
       // Rotate: R (clockwise) or Shift+R (counterclockwise)
-      if (!isModifier && (event.key === "r" || event.key === "R")) {
-        const target = event.target as HTMLElement;
-        if (target.tagName !== "INPUT" && target.tagName !== "TEXTAREA") {
-          event.preventDefault();
+      if (!isModifier && (event.key === 'r' || event.key === 'R')) {
+        const target = event.target as HTMLElement
+        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+          event.preventDefault()
           if (event.shiftKey) {
-            rotateSelected(-90);
+            rotateSelected(-90)
           } else {
-            rotateSelected(90);
+            rotateSelected(90)
           }
         }
       }
-    };
+    }
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [copy, cut, paste, deleteSelected, rotateSelected]);
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [copy, cut, paste, deleteSelected, rotateSelected])
 
-  const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const { screenToFlowPosition } = useReactFlow();
+  const reactFlowWrapper = useRef<HTMLDivElement>(null)
+  const { screenToFlowPosition } = useReactFlow()
 
   const onNodesChange: OnNodesChange = useCallback(
     (changes) => {
       const hasSignificantChange = changes.some(
-        (change) => change.type === "remove" || change.type === "add"
-      );
+        (change) => change.type === 'remove' || change.type === 'add'
+      )
       if (hasSignificantChange) {
-        takeSnapshot();
+        takeSnapshot()
       }
 
-      const updatedNodes = applyNodeChanges(changes, nodes);
-      setNodes(updatedNodes as GraphNode[]);
+      const updatedNodes = applyNodeChanges(changes, nodes)
+      setNodes(updatedNodes as GraphNode[])
     },
     [nodes, setNodes, takeSnapshot]
-  );
+  )
 
   const onEdgesChange: OnEdgesChange = useCallback(
     (changes) => {
       // Take snapshot before edge changes
       const hasSignificantChange = changes.some(
-        (change) => change.type === "remove" || change.type === "add"
-      );
+        (change) => change.type === 'remove' || change.type === 'add'
+      )
       if (hasSignificantChange) {
-        takeSnapshot();
+        takeSnapshot()
       }
 
       // Apply XyFlow changes and sync to store
-      const updatedEdges = applyEdgeChanges(changes, edges);
-      setEdges(updatedEdges as GraphEdge[]);
+      const updatedEdges = applyEdgeChanges(changes, edges)
+      setEdges(updatedEdges as GraphEdge[])
     },
     [edges, setEdges, takeSnapshot]
-  );
+  )
 
   const onConnect: OnConnect = useCallback(
     (connection) => {
       // Take snapshot before adding edge
-      takeSnapshot();
+      takeSnapshot()
       // Create edge with connection data
-      const newEdge = xyflowAddEdge(connection, edges)[
-        edges.length
-      ] as GraphEdge;
+      const newEdge = xyflowAddEdge(connection, edges)[edges.length] as GraphEdge
       if (newEdge) {
         // Get source and target nodes
-        const sourceNode = nodes.find((n) => n.id === connection.source);
-        const targetNode = nodes.find((n) => n.id === connection.target);
+        const sourceNode = nodes.find((n) => n.id === connection.source)
+        const targetNode = nodes.find((n) => n.id === connection.target)
 
         // Get dtypes for source and target ports
         const sourceDType = getPortDTypeFromNode(
           sourceNode,
-          connection.sourceHandle || "0",
-          "output"
-        );
+          connection.sourceHandle || '0',
+          'output'
+        )
         const targetDType = getPortDTypeFromNode(
           targetNode,
-          connection.targetHandle || "0",
-          "input"
-        );
+          connection.targetHandle || '0',
+          'input'
+        )
 
         // Determine edge color based on dtype matching
-        const edgeColor = getEdgeColorFromDTypes(sourceDType, targetDType);
+        const edgeColor = getEdgeColorFromDTypes(sourceDType, targetDType)
 
         // Add connection metadata and styling
         newEdge.data = {
-          sourcePort: connection.sourceHandle || "0",
-          targetPort: connection.targetHandle || "0",
+          sourcePort: connection.sourceHandle || '0',
+          targetPort: connection.targetHandle || '0',
           color: edgeColor,
-        };
+        }
         newEdge.style = {
           ...newEdge.style,
           stroke: edgeColor,
-        };
+        }
         newEdge.markerEnd = {
           type: MarkerType.ArrowClosed,
           color: edgeColor,
-        };
-        addEdge(newEdge);
+        }
+        addEdge(newEdge)
       }
     },
     [edges, nodes, addEdge, takeSnapshot]
-  );
+  )
 
   const onNodeDragStart = useCallback(() => {
     // Take snapshot BEFORE dragging to capture old position
     // This ensures undo restores to the position before the drag started
-    takeSnapshot();
-  }, [takeSnapshot]);
+    takeSnapshot()
+  }, [takeSnapshot])
 
   const onDragOver = useCallback((event: DragEvent) => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = "copy";
-  }, []);
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'copy'
+  }, [])
 
   const onDrop = useCallback(
     (event: DragEvent) => {
-      event.preventDefault();
+      event.preventDefault()
 
       // Get the block data from the drag event
-      const blockDataString = event.dataTransfer.getData(
-        "application/gnuradio-block"
-      );
-      if (!blockDataString) return;
+      const blockDataString = event.dataTransfer.getData('application/gnuradio-block')
+      if (!blockDataString) return
 
-      const block: GnuRadioBlock = JSON.parse(blockDataString);
+      const block: GnuRadioBlock = JSON.parse(blockDataString)
 
       // Calculate position on the canvas
       const position = screenToFlowPosition({
         x: event.clientX,
         y: event.clientY,
-      });
+      })
 
       // Create new node with proper GraphNode structure
-      const nodeIdValue = getNodeId();
+      const nodeIdValue = getNodeId()
 
       // Initialize parameters with default values from block definition
-      const initialParameters: Record<string, string | number | boolean> = {};
+      const initialParameters: Record<string, string | number | boolean> = {}
       block.parameters?.forEach((param) => {
         if (param.default !== undefined) {
-          initialParameters[param.id] = param.default;
+          initialParameters[param.id] = param.default
         }
-      });
+      })
 
       const instanceData: BlockInstanceData = {
         blockDefinition: block,
@@ -285,23 +279,23 @@ function ReactFlowContent() {
         bus_source: false,
         bus_structure: null,
         rotation: 0,
-      };
+      }
 
       const newNode: GraphNode = {
         id: nodeIdValue,
-        type: "block",
+        type: 'block',
         position,
         data: instanceData,
-      };
+      }
 
       // Take snapshot before adding node (captures state without this node)
-      takeSnapshot();
+      takeSnapshot()
 
       // Add to store
-      setNodes([...nodes, newNode]);
+      setNodes([...nodes, newNode])
     },
     [screenToFlowPosition, nodes, setNodes, takeSnapshot]
-  );
+  )
 
   return (
     <ContextMenu>
@@ -331,17 +325,17 @@ function ReactFlowContent() {
         <ContextMenuItem onClick={cut} disabled={!hasSelection}>
           <Scissors className="mr-2 h-4 w-4" />
           Cut
-          <ContextMenuShortcut>{isMac ? "⌘X" : "Ctrl+X"}</ContextMenuShortcut>
+          <ContextMenuShortcut>{isMac ? '⌘X' : 'Ctrl+X'}</ContextMenuShortcut>
         </ContextMenuItem>
         <ContextMenuItem onClick={copy} disabled={!hasSelection}>
           <ClipboardCopy className="mr-2 h-4 w-4" />
           Copy
-          <ContextMenuShortcut>{isMac ? "⌘C" : "Ctrl+C"}</ContextMenuShortcut>
+          <ContextMenuShortcut>{isMac ? '⌘C' : 'Ctrl+C'}</ContextMenuShortcut>
         </ContextMenuItem>
         <ContextMenuItem onClick={paste} disabled={!hasClipboard}>
           <Clipboard className="mr-2 h-4 w-4" />
           Paste
-          <ContextMenuShortcut>{isMac ? "⌘V" : "Ctrl+V"}</ContextMenuShortcut>
+          <ContextMenuShortcut>{isMac ? '⌘V' : 'Ctrl+V'}</ContextMenuShortcut>
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem onClick={() => rotateSelected(90)} disabled={!hasSelection}>
@@ -355,18 +349,14 @@ function ReactFlowContent() {
           <ContextMenuShortcut>⇧R</ContextMenuShortcut>
         </ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem
-          onClick={deleteSelected}
-          disabled={!hasSelection}
-          variant="destructive"
-        >
+        <ContextMenuItem onClick={deleteSelected} disabled={!hasSelection} variant="destructive">
           <Trash2 className="mr-2 h-4 w-4" />
           Delete
-          <ContextMenuShortcut>{isMac ? "⌫" : "Del"}</ContextMenuShortcut>
+          <ContextMenuShortcut>{isMac ? '⌫' : 'Del'}</ContextMenuShortcut>
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
-  );
+  )
 }
 
 export function ReactFlowWindow() {
@@ -374,5 +364,5 @@ export function ReactFlowWindow() {
     <ReactFlowProvider>
       <ReactFlowContent />
     </ReactFlowProvider>
-  );
+  )
 }
