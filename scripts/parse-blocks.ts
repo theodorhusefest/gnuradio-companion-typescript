@@ -16,25 +16,31 @@ import type {
 } from "../src/types/blocks.js";
 
 // Configuration
-function getGnuRadioPackagePath() {
+function getGnuRadioPackagePaths(): string[] {
   const platform = os.platform();
+  const paths: string[] = [];
+
   switch (platform) {
     case "darwin":
-      return "/opt/homebrew/share/gnuradio/grc/blocks";
+      paths.push("/opt/homebrew/share/gnuradio/grc/blocks");
+      break;
     case "linux":
-      return "/usr/share/gnuradio/grc/blocks";
+      paths.push("/usr/share/gnuradio/grc/blocks");
+      break;
     default:
-      throw new Error("Gnu-Radio path not implemented for this OS");
+      console.warn(`GNU Radio path not configured for platform: ${platform}`);
   }
+
+  paths.push(path.join(process.env.HOME || "", ".local/state/gnuradio"));
+  return paths;
 }
-const BLOCK_PATHS = [
-  getGnuRadioPackagePath(),
-  path.join(process.env.HOME || "", ".local/state/gnuradio"),
-];
+
+const BLOCK_PATHS = getGnuRadioPackagePaths();
 
 const OUTPUT_DIR = path.join(process.cwd(), "src", "blocks");
 const OUTPUT_JSON = path.join(OUTPUT_DIR, "blocks.json");
 const OUTPUT_TYPES = path.join(OUTPUT_DIR, "types.ts");
+const FIXTURE_PATH = path.join(OUTPUT_DIR, "blocks-fixture.json");
 
 /**
  * Recursively find all .block.yml files in a directory
@@ -118,6 +124,46 @@ function main() {
   }
 
   console.log(`\n📦 Total block files found: ${allBlockFiles.length}\n`);
+
+  // If no blocks found, use fixture for CI/testing environments
+  if (allBlockFiles.length === 0) {
+    console.log("⚠️  No GNU Radio blocks found on system.");
+    if (fs.existsSync(FIXTURE_PATH)) {
+      console.log("📋 Using fixture data for CI/testing...");
+      fs.copyFileSync(FIXTURE_PATH, OUTPUT_JSON);
+      console.log(`✨ Copied fixture to: ${OUTPUT_JSON}`);
+
+      // Generate types file for consistency
+      const fixtureData = JSON.parse(fs.readFileSync(FIXTURE_PATH, "utf8"));
+      const typesContent = `/**
+ * GNU Radio Block Types
+ *
+ * Auto-generated from fixture on ${new Date().toISOString()}
+ * Total blocks: ${fixtureData.total_blocks}
+ *
+ * Note: This file re-exports types from @/types/blocks
+ * Import directly from @/types/blocks for better type inference
+ */
+
+export type {
+  BlockParameter,
+  BlockPort,
+  BlockTemplates,
+  CppTemplates,
+  GnuRadioBlock,
+  BlocksByCategory,
+  BlocksData,
+} from '@/types/blocks';
+`;
+      fs.writeFileSync(OUTPUT_TYPES, typesContent);
+      console.log(`✨ Generated: ${OUTPUT_TYPES}`);
+      console.log("\n🎉 Block parsing complete (using fixture)!\n");
+      return;
+    } else {
+      console.error("❌ No fixture found at:", FIXTURE_PATH);
+      process.exit(1);
+    }
+  }
 
   // Parse all blocks
   const blocks: GnuRadioBlock[] = [];

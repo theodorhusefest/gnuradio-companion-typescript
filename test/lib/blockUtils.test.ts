@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   buildParametersWithValues,
-  getPortDType,
   calculateNodeHeight,
+  getPortDType,
   getShouldShowPorts,
 } from "../../src/lib/blockUtils";
 import type { BlockParameter } from "../../src/types/blocks";

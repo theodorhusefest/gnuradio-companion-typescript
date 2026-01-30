@@ -9,15 +9,10 @@
     "email": "info@gnuradio.org"
   },
   "scripts": {
-    "dev": "vite",
-    "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron dist-electron/main.js\"",
-    "build": "tsc -b && vite build",
-    "electron:build": "pnpm run electron:compile && pnpm run build && electron-builder",
-    "electron:compile": "tsc -p tsconfig.electron.json",
+    "dev": "pnpm run parse-blocks && vite",
+    "build": "pnpm run parse-blocks && tsc -b && vite build",
     "preview": "vite preview",
     "parse-blocks": "tsx scripts/parse-blocks.ts",
-    "predev": "pnpm run parse-blocks",
-    "prebuild": "pnpm run parse-blocks",
     "tsc": "tsc --noEmit",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
@@ -27,6 +22,9 @@
     "test:coverage": "vitest --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron dist-electron/main.js\"",
+    "electron:build": "pnpm run electron:compile && pnpm run build && electron-builder",
+    "electron:compile": "tsc -p tsconfig.electron.json",
     "check": "pnpm tsc && pnpm lint && pnpm test && pnpm test:e2e"
   },
   "dependencies": {
