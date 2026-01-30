@@ -21,7 +21,7 @@ import { useTemporalActions } from "@/stores/useTemporalStore";
 import { useClipboardStore } from "@/stores/clipboardStore";
 import { useClipboard } from "@/hooks/useClipboard";
 import type { GraphNode, GraphEdge, BlockInstanceData } from "@/types/graph";
-import { useTheme } from "./theme-provider";
+import { useTheme } from "@/hooks/use-theme";
 import {
   ContextMenu,
   ContextMenuContent,
