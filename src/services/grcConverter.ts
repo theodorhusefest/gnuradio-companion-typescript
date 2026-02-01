@@ -6,7 +6,7 @@
  * Full conversion logic to be implemented later
  */
 
-import type { GraphNode, GraphEdge } from "../types/graph";
+import type { GraphNode, GraphEdge } from '../types/graph'
 
 /**
  * GRC File Format Types
@@ -14,64 +14,64 @@ import type { GraphNode, GraphEdge } from "../types/graph";
  */
 
 export type GRCOptions = {
-  parameters: Record<string, string | number | boolean>;
+  parameters: Record<string, string | number | boolean>
   states: {
-    bus_sink: boolean;
-    bus_source: boolean;
-    bus_structure: string | null;
-    coordinate: [number, number];
-    rotation: number;
-    state: string;
-  };
-};
+    bus_sink: boolean
+    bus_source: boolean
+    bus_structure: string | null
+    coordinate: [number, number]
+    rotation: number
+    state: string
+  }
+}
 
 export type GRCBlock = {
-  name: string;
-  id: string;
-  parameters: Record<string, string | number | boolean>;
+  name: string
+  id: string
+  parameters: Record<string, string | number | boolean>
   states: {
-    bus_sink: boolean;
-    bus_source: boolean;
-    bus_structure: string | null;
-    coordinate: [number, number];
-    rotation: number;
-    state: string;
-  };
-};
+    bus_sink: boolean
+    bus_source: boolean
+    bus_structure: string | null
+    coordinate: [number, number]
+    rotation: number
+    state: string
+  }
+}
 
 export type GRCConnection = {
   // Format: [source_block_name, source_port, target_block_name, target_port]
-  0: string; // source block name
-  1: string; // source port
-  2: string; // target block name
-  3: string; // target port
-};
+  0: string // source block name
+  1: string // source port
+  2: string // target block name
+  3: string // target port
+}
 
 export type GRCMetadata = {
-  file_format: number;
-  grc_version: string;
-};
+  file_format: number
+  grc_version: string
+}
 
 export type GRCFile = {
-  options: GRCOptions;
-  blocks: GRCBlock[];
-  connections: GRCConnection[];
-  metadata: GRCMetadata;
-};
+  options: GRCOptions
+  blocks: GRCBlock[]
+  connections: GRCConnection[]
+  metadata: GRCMetadata
+}
 
 /**
  * Result type for parse operations
  */
 export type ParseResult = {
-  nodes: GraphNode[];
-  edges: GraphEdge[];
+  nodes: GraphNode[]
+  edges: GraphEdge[]
   metadata: {
-    author?: string;
-    title?: string;
-    description?: string;
-    grcVersion?: string;
-  };
-};
+    author?: string
+    title?: string
+    description?: string
+    grcVersion?: string
+  }
+}
 
 /**
  * Parse a GRC YAML file into graph nodes and edges
@@ -91,18 +91,18 @@ export type ParseResult = {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function parseGRCToGraph(_yamlContent: string): ParseResult {
   // STUB: Return empty graph for now
-  console.warn("parseGRCToGraph: Stub implementation - returning empty graph");
+  console.warn('parseGRCToGraph: Stub implementation - returning empty graph')
 
   return {
     nodes: [],
     edges: [],
     metadata: {
-      author: "",
-      title: "Untitled",
-      description: "",
-      grcVersion: "3.10.0",
+      author: '',
+      title: 'Untitled',
+      description: '',
+      grcVersion: '3.10.0',
     },
-  };
+  }
 
   // TODO: Implementation steps:
   // 1. Parse YAML using a YAML parser (e.g., js-yaml)
@@ -151,20 +151,20 @@ export function exportGraphToGRC(
   _nodes: GraphNode[],
   _edges: GraphEdge[],
   metadata?: {
-    author?: string;
-    title?: string;
-    description?: string;
-    grcVersion?: string;
+    author?: string
+    title?: string
+    description?: string
+    grcVersion?: string
   }
 ): string {
   // STUB: Return empty YAML for now
-  console.warn("exportGraphToGRC: Stub implementation - returning empty YAML");
+  console.warn('exportGraphToGRC: Stub implementation - returning empty YAML')
 
   return `# GRC file (stub implementation)
 options:
   parameters:
-    title: ${metadata?.title || "Untitled"}
-    author: ${metadata?.author || ""}
+    title: ${metadata?.title || 'Untitled'}
+    author: ${metadata?.author || ''}
 
 blocks: []
 
@@ -172,8 +172,8 @@ connections: []
 
 metadata:
   file_format: 1
-  grc_version: ${metadata?.grcVersion || "3.10.0"}
-`;
+  grc_version: ${metadata?.grcVersion || '3.10.0'}
+`
 
   // TODO: Implementation steps:
   // 1. Create GRCFile structure
@@ -203,6 +203,6 @@ metadata:
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function validateGRCFile(_grcFile: GRCFile): string[] | null {
-  console.warn("validateGRCFile: Stub implementation");
-  return null;
+  console.warn('validateGRCFile: Stub implementation')
+  return null
 }

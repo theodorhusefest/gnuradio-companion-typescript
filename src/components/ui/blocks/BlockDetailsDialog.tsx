@@ -1,4 +1,4 @@
-import type { BlockParameter } from "@/blocks/types";
+import type { BlockParameter } from '@/blocks/types'
 import {
   Dialog,
   DialogHeader,
@@ -6,47 +6,41 @@ import {
   DialogContent,
   DialogFooter,
   DialogClose,
-} from "@/components/ui/dialog";
-import { Button } from "../button";
+} from '@/components/ui/dialog'
+import { Button } from '../button'
 
 type Props = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  parameters: BlockParameter[];
-  nodeId: string;
-  onSave: (parameters: Record<string, string | number>) => void;
-};
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  parameters: BlockParameter[]
+  nodeId: string
+  onSave: (parameters: Record<string, string | number>) => void
+}
 
-const BlockDetailsDialog = ({
-  open,
-  onOpenChange,
-  parameters,
-  nodeId,
-  onSave,
-}: Props) => {
-  const formId = `form-${nodeId}`;
+const BlockDetailsDialog = ({ open, onOpenChange, parameters, nodeId, onSave }: Props) => {
+  const formId = `form-${nodeId}`
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const updatedParameters: Record<string, string | number> = {};
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    const updatedParameters: Record<string, string | number> = {}
 
     parameters.forEach((param) => {
-      const value = formData.get(param.id);
-      if (value !== null && typeof value === "string") {
+      const value = formData.get(param.id)
+      if (value !== null && typeof value === 'string') {
         // Convert to number for numeric types
-        if (param.dtype === "int" || param.dtype === "float") {
-          const numValue = Number(value);
-          updatedParameters[param.id] = isNaN(numValue) ? value : numValue;
+        if (param.dtype === 'int' || param.dtype === 'float') {
+          const numValue = Number(value)
+          updatedParameters[param.id] = isNaN(numValue) ? value : numValue
         } else {
-          updatedParameters[param.id] = value;
+          updatedParameters[param.id] = value
         }
       }
-    });
+    })
 
-    onSave(updatedParameters);
-    onOpenChange(false);
-  };
+    onSave(updatedParameters)
+    onOpenChange(false)
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -61,10 +55,7 @@ const BlockDetailsDialog = ({
         >
           {parameters.map((param) => (
             <div key={param.id} className="space-y-2">
-              <label
-                htmlFor={`${nodeId}-${param.id}`}
-                className="block font-medium w-1/4 text-sm"
-              >
+              <label htmlFor={`${nodeId}-${param.id}`} className="block font-medium w-1/4 text-sm">
                 {param.label}
               </label>
               {param.options && param.options.length > 0 ? (
@@ -80,13 +71,13 @@ const BlockDetailsDialog = ({
                     </option>
                   ))}
                 </select>
-              ) : param.dtype === "int" || param.dtype === "float" ? (
+              ) : param.dtype === 'int' || param.dtype === 'float' ? (
                 <input
                   type="number"
                   id={`${nodeId}-${param.id}`}
                   name={param.id}
                   defaultValue={param.default?.toString()}
-                  step={param.dtype === "float" ? "any" : "1"}
+                  step={param.dtype === 'float' ? 'any' : '1'}
                   className="w-full px-3 py-2 border rounded"
                 />
               ) : (
@@ -110,7 +101,7 @@ const BlockDetailsDialog = ({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default BlockDetailsDialog;
+export default BlockDetailsDialog

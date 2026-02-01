@@ -1,6 +1,6 @@
-import UndoRedoButtons from "./Toolbar/UndoRedoButtons";
-import RotationButtons from "./Toolbar/RotationButtons";
-import ModeToggle from "./Toolbar/ModeToggle";
+import UndoRedoButtons from './Toolbar/UndoRedoButtons'
+import RotationButtons from './Toolbar/RotationButtons'
+import ModeToggle from './Toolbar/ModeToggle'
 
 const Toolbar = () => {
   return (
@@ -14,7 +14,7 @@ const Toolbar = () => {
       </div>
       <ModeToggle />
     </div>
-  );
-};
+  )
+}
 
-export default Toolbar;
+export default Toolbar
