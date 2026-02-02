@@ -1,3 +1,4 @@
+import LayoutButtons from "./Toolbar/LayoutButtons";
 import ModeToggle from "./Toolbar/ModeToggle";
 import RotationButtons from "./Toolbar/RotationButtons";
 import UndoRedoButtons from "./Toolbar/UndoRedoButtons";
@@ -10,6 +11,7 @@ const Toolbar = () => {
         <div className="flex gap-2">
           <UndoRedoButtons />
           <RotationButtons />
+          <LayoutButtons />
         </div>
       </div>
       <ModeToggle />
