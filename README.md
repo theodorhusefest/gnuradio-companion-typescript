@@ -37,6 +37,20 @@ The app will automatically parse GNU Radio blocks on startup.
 pnpm run build
 ```
 
+### Electron standalone application
+Electron is a way of running the javascript application without a browser. Electron is Chromium based and should work on any OS.
+Electron requires the code to be compiled to ESmodule javascript before running.
+
+Build with
+```bash
+pnpm run electron:build
+```
+
+Run with
+```bash
+pnpm run electron:dev
+```
+
 ## How It Works
 
 ### Block Parsing
@@ -101,7 +115,7 @@ pnpm run parse-blocks
 
 This project uses **build-time generation** (similar to GNU Radio Companion's caching approach):
 
-- Blocks are parsed once during `npm run dev` or `npm run build`
+- Blocks are parsed once during `pnpm run dev` or `pnpm run build`
 - Generated files are cached and reused until GNU Radio is updated
 - Fast startup and no runtime parsing overhead
 
