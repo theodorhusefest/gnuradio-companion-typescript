@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   buildParametersWithValues,
-  getBlockType,
+  getPortDType,
   getShouldShowPorts,
   calculateNodeHeight,
 } from "../../src/lib/blockUtils";
@@ -45,14 +45,14 @@ describe("blockUtils", () => {
     });
   });
 
-  describe("getBlockType", () => {
+  describe("getPortDType", () => {
     it("should return the type parameter value as string", () => {
       const parameters: BlockParameter[] = [
         { id: "freq", label: "Frequency", dtype: "real", default: 1000 },
         { id: "type", label: "Type", dtype: "enum", default: "complex" },
       ];
 
-      const result = getBlockType(parameters);
+      const result = getPortDType(parameters);
 
       expect(result).toBe("complex");
     });
@@ -62,7 +62,7 @@ describe("blockUtils", () => {
         { id: "freq", label: "Frequency", dtype: "real", default: 1000 },
       ];
 
-      const result = getBlockType(parameters);
+      const result = getPortDType(parameters);
 
       expect(result).toBeUndefined();
     });
@@ -72,7 +72,7 @@ describe("blockUtils", () => {
         { id: "type", label: "Type", dtype: "int", default: 42 },
       ];
 
-      const result = getBlockType(parameters);
+      const result = getPortDType(parameters);
 
       expect(result).toBe("42");
     });
