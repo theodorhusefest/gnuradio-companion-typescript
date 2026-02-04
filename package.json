@@ -23,7 +23,8 @@
     "predev": "pnpm run parse-blocks",
     "prebuild": "pnpm run parse-blocks",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:all": "ALL_BROWSERS=1 playwright test"
   },
   "dependencies": {
     "@radix-ui/react-collapsible": "^1.1.12",

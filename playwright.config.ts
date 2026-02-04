@@ -1,4 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
+import os from 'os';
+import fs from 'fs';
 
 /**
  * Read environment variables from file.
@@ -9,8 +11,24 @@ import { defineConfig, devices } from '@playwright/test';
 // dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 /**
+ * WebKit requires system dependencies only available on macOS and Debian-based Linux (Ubuntu/Debian).
+ * Automatically detected based on OS platform. Can be forced with ALL_BROWSERS=1.
+ */
+function supportsWebKit(): boolean {
+  if (process.env.ALL_BROWSERS || process.env.CI) return true;
+  const platform = os.platform();
+  if (platform === 'darwin') return true;
+  if (platform === 'win32') return true;
+  if (platform === 'linux') return fs.existsSync('/etc/debian_version');
+  return false;
+}
+
+const includeWebKit = supportsWebKit();
+
+/**
  * See https://playwright.dev/docs/test-configuration.
  */
+
 export default defineConfig({
   testDir: './e2e',
   /* Run tests in files in parallel */
@@ -44,10 +62,14 @@ export default defineConfig({
       use: { ...devices['Desktop Firefox'] },
     },
 
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
+    ...(includeWebKit
+      ? [
+          {
+            name: 'webkit',
+            use: { ...devices['Desktop Safari'] },
+          },
+        ]
+      : []),
 
     /* Test against mobile viewports. */
     // {
