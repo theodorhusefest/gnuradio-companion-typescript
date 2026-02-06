@@ -138,7 +138,6 @@ function main() {
       const typesContent = `/**
  * GNU Radio Block Types
  *
- * Auto-generated from fixture on ${new Date().toISOString()}
  * Total blocks: ${fixtureData.total_blocks}
  *
  * Note: This file re-exports types from @/types/blocks
@@ -210,9 +209,6 @@ export type {
   // Generate TypeScript types (re-export from main types file)
   const typesContent = `/**
  * GNU Radio Block Types
- *
- * Auto-generated on ${new Date().toISOString()}
- * Total blocks: ${blocks.length}
  *
  * Note: This file re-exports types from @/types/blocks
  * Import directly from @/types/blocks for better type inference
