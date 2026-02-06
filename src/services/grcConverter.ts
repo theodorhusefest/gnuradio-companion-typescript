@@ -6,7 +6,7 @@
  * Full conversion logic to be implemented later
  */
 
-import type { GraphNode, GraphEdge } from "../types/graph";
+import type { GraphEdge, GraphNode } from "../types/graph";
 
 /**
  * GRC File Format Types
@@ -155,7 +155,7 @@ export function exportGraphToGRC(
     title?: string;
     description?: string;
     grcVersion?: string;
-  }
+  },
 ): string {
   // STUB: Return empty YAML for now
   console.warn("exportGraphToGRC: Stub implementation - returning empty YAML");

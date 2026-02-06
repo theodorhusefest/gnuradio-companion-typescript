@@ -5,7 +5,7 @@
  */
 
 import { create } from "zustand";
-import type { GraphNode, GraphEdge } from "../types/graph";
+import type { GraphEdge, GraphNode } from "../types/graph";
 
 export type ClipboardData = {
   nodes: GraphNode[];

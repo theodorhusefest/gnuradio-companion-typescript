@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   buildParametersWithValues,
+  calculateNodeHeight,
   getPortDType,
   getShouldShowPorts,
-  calculateNodeHeight,
 } from "../../src/lib/blockUtils";
 import type { BlockParameter } from "../../src/types/blocks";
 
@@ -81,7 +81,12 @@ describe("blockUtils", () => {
   describe("getShouldShowPorts", () => {
     it("should return true when showports parameter is 'True'", () => {
       const parameters: BlockParameter[] = [
-        { id: "showports", label: "Show Ports", dtype: "bool", default: "True" },
+        {
+          id: "showports",
+          label: "Show Ports",
+          dtype: "bool",
+          default: "True",
+        },
       ];
 
       const result = getShouldShowPorts(parameters);
@@ -91,7 +96,12 @@ describe("blockUtils", () => {
 
     it("should return false when showports parameter is 'False'", () => {
       const parameters: BlockParameter[] = [
-        { id: "showports", label: "Show Ports", dtype: "bool", default: "False" },
+        {
+          id: "showports",
+          label: "Show Ports",
+          dtype: "bool",
+          default: "False",
+        },
       ];
 
       const result = getShouldShowPorts(parameters);

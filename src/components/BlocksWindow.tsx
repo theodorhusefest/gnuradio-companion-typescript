@@ -1,14 +1,14 @@
-import { useState, useMemo } from "react";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import blocksData from "@/blocks/blocks.json";
+import type { BlocksData, GnuRadioBlock } from "@/blocks/types";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronRight, Search } from "lucide-react";
-import type { BlocksData, GnuRadioBlock } from "@/blocks/types";
-import blocksData from "@/blocks/blocks.json";
+import { useMemo, useState } from "react";
 
 const blocks = blocksData as BlocksData;
 
@@ -30,7 +30,7 @@ function CategoryBlocks({
     return categoryBlocks.filter(
       (block) =>
         block.label.toLowerCase().includes(query) ||
-        block.id.toLowerCase().includes(query)
+        block.id.toLowerCase().includes(query),
     );
   }, [categoryBlocks, searchQuery]);
 
@@ -52,9 +52,7 @@ function CategoryBlocks({
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
       <CollapsibleTrigger className="flex items-center gap-2 w-full px-4 py-2 hover:bg-accent transition-colors group">
         <ChevronRight
-          className={`h-4 w-4 transition-transform ${
-            isOpen ? "rotate-90" : ""
-          }`}
+          className={`h-4 w-4 transition-transform ${isOpen ? "rotate-90" : ""}`}
         />
         <span className="font-medium text-sm">{category}</span>
         <span className="ml-auto text-xs text-muted-foreground">
@@ -70,7 +68,7 @@ function CategoryBlocks({
             onDragStart={(e) => {
               e.dataTransfer.setData(
                 "application/gnuradio-block",
-                JSON.stringify(block)
+                JSON.stringify(block),
               );
               e.dataTransfer.effectAllowed = "copy";
             }}
@@ -98,13 +96,13 @@ export function BlocksWindow() {
         const matchingBlocks = categoryBlocks.filter(
           (block) =>
             block.label.toLowerCase().includes(query) ||
-            block.id.toLowerCase().includes(query)
+            block.id.toLowerCase().includes(query),
         );
 
         if (matchingBlocks.length > 0) {
           filtered[category] = matchingBlocks;
         }
-      }
+      },
     );
 
     return filtered;

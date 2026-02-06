@@ -5,7 +5,7 @@ import type { BlockParameter } from "@/types/blocks";
  */
 export function buildParametersWithValues(
   blockParameters: BlockParameter[] | undefined,
-  currentValues: Record<string, string | number | boolean>
+  currentValues: Record<string, string | number | boolean>,
 ): BlockParameter[] {
   if (!blockParameters) return [];
   return blockParameters.map((param) => ({
@@ -18,9 +18,7 @@ export function buildParametersWithValues(
  * Extracts the block type from parameters
  * If the type parameter has no default but has options, uses the first option
  */
-export function getPortDType(
-  parameters: BlockParameter[]
-): string | undefined {
+export function getPortDType(parameters: BlockParameter[]): string | undefined {
   const typeParam = parameters.find((param) => param.id === "type");
   if (!typeParam) return undefined;
 
@@ -50,7 +48,7 @@ export function calculateNodeHeight(
   inputCount: number,
   outputCount: number,
   baseHeight = 100,
-  portHeight = 40
+  portHeight = 40,
 ): number {
   return baseHeight + portHeight * Math.max(inputCount, outputCount);
 }
