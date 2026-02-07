@@ -1,6 +1,6 @@
-import { defineConfig, devices } from '@playwright/test';
-import os from 'os';
-import fs from 'fs';
+import { defineConfig, devices } from "@playwright/test";
+import fs from "fs";
+import os from "os";
 
 /**
  * Read environment variables from file.
@@ -17,9 +17,9 @@ import fs from 'fs';
 function supportsWebKit(): boolean {
   if (process.env.ALL_BROWSERS || process.env.CI) return true;
   const platform = os.platform();
-  if (platform === 'darwin') return true;
-  if (platform === 'win32') return true;
-  if (platform === 'linux') return fs.existsSync('/etc/debian_version');
+  if (platform === "darwin") return true;
+  if (platform === "win32") return true;
+  if (platform === "linux") return fs.existsSync("/etc/debian_version");
   return false;
 }
 
@@ -65,8 +65,8 @@ export default defineConfig({
     ...(includeWebKit
       ? [
           {
-            name: 'webkit',
-            use: { ...devices['Desktop Safari'] },
+            name: "webkit",
+            use: { ...devices["Desktop Safari"] },
           },
         ]
       : []),
