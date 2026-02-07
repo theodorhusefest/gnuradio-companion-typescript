@@ -31,6 +31,16 @@ pnpm run dev
 
 The app will automatically parse GNU Radio blocks on startup.
 
+Install pre-commit with any packet manager.
+```
+brew install pre-commit
+```
+Install the repo specific pre-commits by running, in project root,
+
+```
+pre-commit install
+```
+
 ### Build
 
 ```bash
