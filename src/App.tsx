@@ -7,8 +7,8 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { useEffect } from "react";
 import { useTemporalActions } from "@/stores/useTemporalStore";
+import { useEffect } from "react";
 
 function App() {
   const { undo, redo } = useTemporalActions();

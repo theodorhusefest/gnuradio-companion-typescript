@@ -2,9 +2,9 @@
  * Tests for block utilities
  */
 
-import { describe, it, expect } from "vitest";
-import { getPortHandleId, getPorts } from "../../src/lib/portUtils";
+import { describe, expect, it } from "vitest";
 import type { BlockPort } from "../../src/blocks/types";
+import { getPortHandleId, getPorts } from "../../src/lib/portUtils";
 
 describe("blockUtils", () => {
   describe("getPortHandleId", () => {

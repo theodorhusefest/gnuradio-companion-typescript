@@ -31,7 +31,7 @@ const Port = ({ port, portId, type, blockDType, position }: Props) => {
       <div
         className={cn(
           getPortColor(port, blockDType),
-          "w-12 flex items-center justify-center h-4 rounded text-xs"
+          "w-12 flex items-center justify-center h-4 rounded text-xs",
         )}
         style={{ transform: handleTransform }}
       >

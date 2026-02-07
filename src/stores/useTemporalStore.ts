@@ -6,8 +6,8 @@
  */
 
 import { create } from "zustand";
+import type { GraphEdge, GraphNode } from "../types/graph";
 import { useGraphStore } from "./graphStore";
-import type { GraphNode, GraphEdge } from "../types/graph";
 
 /**
  * Snapshot of graph state for history

@@ -4,7 +4,7 @@ import type { GraphNode } from "@/types/graph";
 export const getPortHandleId = (
   port: BlockPort,
   index: number,
-  type: "input" | "output"
+  type: "input" | "output",
 ): string => {
   /**
    * Generate a unique handle ID for a port
@@ -42,14 +42,14 @@ export const getPortHandleId = (
  */
 export function getPorts(
   ports: BlockPort[] | undefined,
-  shouldShowPorts: boolean
+  shouldShowPorts: boolean,
 ): BlockPort[] {
   return ports?.filter((port) => !port.optional || shouldShowPorts) ?? [];
 }
 
 export const getPortColor = (
   port: BlockPort,
-  blockDType: string | undefined
+  blockDType: string | undefined,
 ): string => {
   const defaultColor = "bg-slate-200";
 
@@ -84,13 +84,14 @@ export const getPortColor = (
 export function getPortDTypeFromNode(
   node: GraphNode | undefined,
   handleId: string,
-  portType: "input" | "output"
+  portType: "input" | "output",
 ): string | undefined {
   if (!node) return undefined;
 
-  const ports = portType === "input"
-    ? node.data.blockDefinition.inputs
-    : node.data.blockDefinition.outputs;
+  const ports =
+    portType === "input"
+      ? node.data.blockDefinition.inputs
+      : node.data.blockDefinition.outputs;
 
   if (!ports) return undefined;
 
@@ -106,7 +107,9 @@ export function getPortDTypeFromNode(
   if (port.dtype && port.dtype !== "${ type }") return port.dtype;
 
   // Otherwise, check if block has a 'type' parameter (for parameterized blocks)
-  const typeParam = node.data.blockDefinition.parameters?.find((param) => param.id === "type");
+  const typeParam = node.data.blockDefinition.parameters?.find(
+    (param) => param.id === "type",
+  );
   if (!typeParam) return undefined;
 
   if (typeParam.default !== undefined) {
@@ -132,7 +135,7 @@ export function getEdgeColorFromDTypes(
 ): string {
   // If both are undefined or one is undefined, consider it a match (use default color)
 
-  console.log({sourceDType, targetDType})
+  console.log({ sourceDType, targetDType });
   if (!sourceDType || !targetDType) {
     return "var(--foreground)";
   }

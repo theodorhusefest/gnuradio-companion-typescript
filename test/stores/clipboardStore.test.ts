@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { useClipboardStore } from "../../src/stores/clipboardStore";
 import type { GraphNode } from "../../src/types/graph";
 

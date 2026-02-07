@@ -1,11 +1,11 @@
-import React from "react";
-import { describe, expect, it, beforeEach, vi } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import { ReactFlowProvider } from "@xyflow/react";
+import React from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useClipboard } from "../../src/hooks/useClipboard";
-import { useGraphStore } from "../../src/stores/graphStore";
 import { useClipboardStore } from "../../src/stores/clipboardStore";
-import type { GraphNode, GraphEdge } from "../../src/types/graph";
+import { useGraphStore } from "../../src/stores/graphStore";
+import type { GraphEdge, GraphNode } from "../../src/types/graph";
 
 vi.mock("@xyflow/react", async () => {
   const actual = await vi.importActual("@xyflow/react");
@@ -32,7 +32,11 @@ const createMockNode = (id: string, selected = false): GraphNode => ({
   },
 });
 
-const createMockEdge = (id: string, source: string, target: string): GraphEdge => ({
+const createMockEdge = (
+  id: string,
+  source: string,
+  target: string,
+): GraphEdge => ({
   id,
   source,
   target,
@@ -55,7 +59,10 @@ describe("useClipboard", () => {
     const node3 = createMockNode("node3", false);
     const edge1 = createMockEdge("edge1", "node1", "node2"); // internal - should copy
     const edge2 = createMockEdge("edge2", "node1", "node3"); // external - should not copy
-    useGraphStore.setState({ nodes: [node1, node2, node3], edges: [edge1, edge2] });
+    useGraphStore.setState({
+      nodes: [node1, node2, node3],
+      edges: [edge1, edge2],
+    });
 
     const { result } = renderHook(() => useClipboard(), { wrapper });
     act(() => result.current.copy());
@@ -70,7 +77,9 @@ describe("useClipboard", () => {
     const node1 = createMockNode("node1", true);
     const node2 = createMockNode("node2", true);
     const edge = createMockEdge("edge1", "node1", "node2");
-    useClipboardStore.setState({ clipboard: { nodes: [node1, node2], edges: [edge] } });
+    useClipboardStore.setState({
+      clipboard: { nodes: [node1, node2], edges: [edge] },
+    });
 
     const { result } = renderHook(() => useClipboard(), { wrapper });
     act(() => result.current.paste());

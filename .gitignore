@@ -31,9 +31,8 @@ release
 .mcp.json
 CLAUDE.md
 
-# Generated GNU Radio blocks (can be regenerated with npm run parse-blocks)
+# Generated GNU Radio blocks data
 src/blocks/blocks.json
-src/blocks/types.ts
 
 # Test coverage
 coverage
