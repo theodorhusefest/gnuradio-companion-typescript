@@ -8,6 +8,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { useTheme } from "@/hooks/use-theme";
+import { useAutoLayout } from "@/hooks/useAutoLayout";
 import { useClipboard } from "@/hooks/useClipboard";
 import { getEdgeColorFromDTypes, getPortDTypeFromNode } from "@/lib/portUtils";
 import { useClipboardStore } from "@/stores/clipboardStore";
@@ -30,6 +31,7 @@ import {
   type OnNodesChange,
 } from "@xyflow/react";
 import {
+  AlignStartVertical,
   Clipboard,
   ClipboardCopy,
   RotateCcw,
@@ -91,6 +93,9 @@ function ReactFlowContent() {
 
   // Check if clipboard has content
   const hasClipboard = clipboard !== null && clipboard.nodes.length > 0;
+
+  // Auto-layout functionality
+  const { autoLayout, canLayout } = useAutoLayout();
 
   // Rotation functionality
   const updateNode = useGraphStore((state) => state.updateNode);
@@ -371,6 +376,11 @@ function ReactFlowContent() {
           <RotateCcw className="mr-2 h-4 w-4" />
           Rotate Counterclockwise
           <ContextMenuShortcut>⇧R</ContextMenuShortcut>
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem onClick={() => autoLayout()} disabled={!canLayout}>
+          <AlignStartVertical className="mr-2 h-4 w-4" />
+          Auto Layout
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem

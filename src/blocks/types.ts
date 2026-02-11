@@ -1,7 +1,7 @@
 /**
  * GNU Radio Block Types
  *
- * Auto-generated on 2026-02-06T14:04:07.399Z
+ * Auto-generated on 2026-02-06T14:21:59.773Z
  * Total blocks: 528
  *
  * Note: This file re-exports types from @/types/blocks
