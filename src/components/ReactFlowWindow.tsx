@@ -10,6 +10,7 @@ import {
 import { useTheme } from "@/hooks/use-theme";
 import { useAutoLayout } from "@/hooks/useAutoLayout";
 import { useClipboard } from "@/hooks/useClipboard";
+import { duplicateNodes } from "@/lib/duplicateNodes";
 import { getEdgeColorFromDTypes, getPortDTypeFromNode } from "@/lib/portUtils";
 import { useClipboardStore } from "@/stores/clipboardStore";
 import { useGraphStore } from "@/stores/graphStore";
@@ -171,6 +172,7 @@ function ReactFlowContent() {
   }, [copy, cut, paste, deleteSelected, rotateSelected]);
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
+  const isDuplicateDragRef = useRef(false);
   const { screenToFlowPosition } = useReactFlow();
 
   const onNodesChange: OnNodesChange = useCallback(
@@ -178,7 +180,8 @@ function ReactFlowContent() {
       const hasSignificantChange = changes.some(
         (change) => change.type === "remove" || change.type === "add",
       );
-      if (hasSignificantChange) {
+      // Skip snapshot if this add was triggered by duplicate-drag (already snapshotted)
+      if (hasSignificantChange && !isDuplicateDragRef.current) {
         takeSnapshot();
       }
 
@@ -253,11 +256,57 @@ function ReactFlowContent() {
     [edges, nodes, addEdge, takeSnapshot],
   );
 
-  const onNodeDragStart = useCallback(() => {
-    // Take snapshot BEFORE dragging to capture old position
-    // This ensures undo restores to the position before the drag started
-    takeSnapshot();
-  }, [takeSnapshot]);
+  const onNodeDragStart = useCallback(
+    (event: React.MouseEvent, _node: GraphNode, draggedNodes: GraphNode[]) => {
+      // Take snapshot BEFORE dragging to capture old position
+      // This ensures undo restores to the position before the drag started
+      takeSnapshot();
+
+      // Shift+Option (Alt): duplicate-on-drag — clone selected nodes in place
+      if (event.shiftKey && event.altKey) {
+        isDuplicateDragRef.current = true;
+
+        const { clonedNodes, clonedEdges } = duplicateNodes(
+          draggedNodes,
+          edges,
+          { selected: false },
+        );
+
+        // Build old→clone ID mapping for external edge remapping
+        const draggedIds = new Set(draggedNodes.map((n) => n.id));
+        const idMap = new Map<string, string>();
+        for (let i = 0; i < draggedNodes.length; i++) {
+          idMap.set(draggedNodes[i].id, clonedNodes[i].id);
+        }
+
+        // Remap external edges so clones keep the connections at the original position.
+        // The dragged originals move away without external edges.
+        const updatedEdges = edges.map((edge) => {
+          const srcDragged = draggedIds.has(edge.source);
+          const tgtDragged = draggedIds.has(edge.target);
+
+          // Internal edge — stays with dragged originals, clone handled by clonedEdges
+          if (srcDragged && tgtDragged) return edge;
+
+          // External edge — reassign to clone so it stays at original position
+          if (srcDragged) return { ...edge, source: idMap.get(edge.source)! };
+          if (tgtDragged) return { ...edge, target: idMap.get(edge.target)! };
+
+          return edge;
+        });
+
+        // Add clones at original positions; external edges now point to clones
+        setNodes([...nodes, ...clonedNodes]);
+        setEdges([...updatedEdges, ...clonedEdges]);
+
+        // Reset flag after React Flow processes the state update
+        requestAnimationFrame(() => {
+          isDuplicateDragRef.current = false;
+        });
+      }
+    },
+    [takeSnapshot, nodes, edges, setNodes, setEdges],
+  );
 
   const onDragOver = useCallback((event: DragEvent) => {
     event.preventDefault();

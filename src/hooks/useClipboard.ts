@@ -5,19 +5,13 @@
  * Works with React Flow's selection state and the graph store
  */
 
+import { duplicateNodes } from "@/lib/duplicateNodes";
 import { useClipboardStore } from "@/stores/clipboardStore";
 import { useGraphStore } from "@/stores/graphStore";
 import { useTemporalActions } from "@/stores/useTemporalStore";
 import type { GraphEdge, GraphNode } from "@/types/graph";
 import { useReactFlow } from "@xyflow/react";
 import { useCallback } from "react";
-
-// Simple ID generator for pasted nodes
-let pasteIdCounter = 0;
-const generatePasteId = () => `paste_${Date.now()}_${pasteIdCounter++}`;
-
-// Offset for pasted nodes to make them visible
-const PASTE_OFFSET = { x: 20, y: 20 };
 
 export function useClipboard() {
   const { getNodes, getEdges } = useReactFlow();
@@ -65,49 +59,15 @@ export function useClipboard() {
     const nodes = getNodes() as GraphNode[];
     const edges = getEdges() as GraphEdge[];
 
-    // Create ID mapping (old ID -> new ID)
-    const idMap = new Map<string, string>();
-    clipboard.nodes.forEach((node) => {
-      idMap.set(node.id, generatePasteId());
-    });
+    const { clonedNodes, clonedEdges } = duplicateNodes(
+      clipboard.nodes,
+      clipboard.edges,
+      { positionOffset: { x: 20, y: 20 }, selected: true },
+    );
 
-    // Create new nodes with new IDs, offset positions, and selected
-    const newNodes: GraphNode[] = clipboard.nodes.map((node) => ({
-      ...node,
-      id: idMap.get(node.id)!,
-      position: {
-        x: node.position.x + PASTE_OFFSET.x,
-        y: node.position.y + PASTE_OFFSET.y,
-      },
-      selected: true,
-      data: {
-        ...node.data,
-        instanceName: idMap.get(node.id)!,
-      },
-    }));
-
-    // Create new edges with new IDs and remapped source/target
-    const newEdges: GraphEdge[] = clipboard.edges.map((edge) => ({
-      ...edge,
-      id: generatePasteId(),
-      source: idMap.get(edge.source)!,
-      target: idMap.get(edge.target)!,
-      selected: true,
-    }));
-
-    // Deselect all existing nodes and edges
-    const deselectedNodes = nodes.map((node) => ({
-      ...node,
-      selected: false,
-    }));
-    const deselectedEdges = edges.map((edge) => ({
-      ...edge,
-      selected: false,
-    }));
-
-    // Add new nodes and edges
-    setNodes([...deselectedNodes, ...newNodes]);
-    setEdges([...deselectedEdges, ...newEdges]);
+    // Deselect all existing nodes and edges, then add clones
+    setNodes([...nodes.map((n) => ({ ...n, selected: false })), ...clonedNodes]);
+    setEdges([...edges.map((e) => ({ ...e, selected: false })), ...clonedEdges]);
   }, [clipboard, getNodes, getEdges, setNodes, setEdges, takeSnapshot]);
 
   /**
