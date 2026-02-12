@@ -1,6 +1,6 @@
 import { BlocksWindow } from "@/components/BlocksWindow";
+import Canvas from "@/components/Canvas";
 import { DetailsWindow } from "@/components/DetailsWindow";
-import { ReactFlowWindow } from "@/components/ReactFlowWindow";
 import Toolbar from "@/components/Toolbar";
 import {
   ResizableHandle,
@@ -57,7 +57,7 @@ function App() {
           <ResizablePanel defaultSize={75} minSize={30}>
             <ResizablePanelGroup direction="vertical">
               <ResizablePanel defaultSize={70} minSize={30}>
-                <ReactFlowWindow />
+                <Canvas />
               </ResizablePanel>
               <ResizableHandle withHandle />
               <ResizablePanel defaultSize={30} minSize={20}>

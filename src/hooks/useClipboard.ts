@@ -66,8 +66,14 @@ export function useClipboard() {
     );
 
     // Deselect all existing nodes and edges, then add clones
-    setNodes([...nodes.map((n) => ({ ...n, selected: false })), ...clonedNodes]);
-    setEdges([...edges.map((e) => ({ ...e, selected: false })), ...clonedEdges]);
+    setNodes([
+      ...nodes.map((n) => ({ ...n, selected: false })),
+      ...clonedNodes,
+    ]);
+    setEdges([
+      ...edges.map((e) => ({ ...e, selected: false })),
+      ...clonedEdges,
+    ]);
   }, [clipboard, getNodes, getEdges, setNodes, setEdges, takeSnapshot]);
 
   /**

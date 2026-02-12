@@ -1,79 +1,25 @@
 import type { GnuRadioBlock } from "@/blocks/types";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuShortcut,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import { useTheme } from "@/hooks/use-theme";
-import { useAutoLayout } from "@/hooks/useAutoLayout";
-import { useClipboard } from "@/hooks/useClipboard";
 import { duplicateNodes } from "@/lib/duplicateNodes";
 import { getEdgeColorFromDTypes, getPortDTypeFromNode } from "@/lib/portUtils";
-import { useClipboardStore } from "@/stores/clipboardStore";
 import { useGraphStore } from "@/stores/graphStore";
 import { useTemporalActions } from "@/stores/useTemporalStore";
 import type { BlockInstanceData, GraphEdge, GraphNode } from "@/types/graph";
 import {
   applyEdgeChanges,
   applyNodeChanges,
-  Background,
-  Controls,
   MarkerType,
-  ReactFlow,
-  ReactFlowProvider,
   useReactFlow,
   addEdge as xyflowAddEdge,
-  type FitViewOptions,
   type OnConnect,
   type OnEdgesChange,
   type OnNodesChange,
 } from "@xyflow/react";
-import {
-  AlignStartVertical,
-  Clipboard,
-  ClipboardCopy,
-  RotateCcw,
-  RotateCw,
-  Scissors,
-  Trash2,
-} from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, type DragEvent } from "react";
-import BlockNode from "./ui/blocks/BlockNode";
-
-const fitViewOptions: FitViewOptions = {
-  padding: 0.2,
-};
+import { useCallback, useRef, type DragEvent } from "react";
 
 let nodeId = 0;
 const getNodeId = () => `node_${nodeId++}`;
 
-const nodeTypes = {
-  block: BlockNode,
-  gnuradioBlock: BlockNode, // Keep for backward compatibility
-};
-
-const defaultEdgeOptions = {
-  markerEnd: { type: MarkerType.ArrowClosed, color: "var(--foreground)" },
-  style: { strokeWidth: 3, stroke: "var(--foreground)" },
-};
-
-const connectionLineStyle = {
-  strokeWidth: 3,
-  stroke: "var(--foreground)",
-};
-
-// Detect if user is on Mac for keyboard shortcut display
-const isMac =
-  typeof navigator !== "undefined" &&
-  /Mac|iPod|iPhone|iPad/.test(navigator.platform);
-
-function ReactFlowContent() {
-  // Use Zustand stores instead of local state
-  const { theme } = useTheme();
-
+export function useCanvasEvents() {
   const nodes = useGraphStore((state) => state.nodes);
   const edges = useGraphStore((state) => state.edges);
   const setNodes = useGraphStore((state) => state.setNodes);
@@ -81,97 +27,6 @@ function ReactFlowContent() {
   const addEdge = useGraphStore((state) => state.addEdge);
   const { takeSnapshot } = useTemporalActions();
 
-  // Clipboard functionality
-  const clipboard = useClipboardStore((state) => state.clipboard);
-  const { copy, cut, paste, deleteSelected } = useClipboard();
-
-  // Check if there's a selection
-  const hasSelection = useMemo(() => {
-    return (
-      nodes.some((node) => node.selected) || edges.some((edge) => edge.selected)
-    );
-  }, [nodes, edges]);
-
-  // Check if clipboard has content
-  const hasClipboard = clipboard !== null && clipboard.nodes.length > 0;
-
-  // Auto-layout functionality
-  const { autoLayout, canLayout } = useAutoLayout();
-
-  // Rotation functionality
-  const updateNode = useGraphStore((state) => state.updateNode);
-
-  const rotateSelected = useCallback(
-    (angle: number) => {
-      const selectedNodes = nodes.filter((node) => node.selected);
-      if (selectedNodes.length === 0) return;
-
-      takeSnapshot();
-      selectedNodes.forEach((node) => {
-        const currentRotation = node.data.rotation || 0;
-        const newRotation = (currentRotation + angle + 360) % 360;
-        updateNode(node.id, { rotation: newRotation });
-      });
-    },
-    [nodes, updateNode, takeSnapshot],
-  );
-
-  // Keyboard shortcuts for clipboard operations
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // Check for Cmd (Mac) or Ctrl (Windows/Linux)
-      const isModifier = event.metaKey || event.ctrlKey;
-
-      // Copy: Cmd/Ctrl + C
-      if (isModifier && event.key === "c") {
-        event.preventDefault();
-        copy();
-      }
-
-      // Cut: Cmd/Ctrl + X
-      if (isModifier && event.key === "x") {
-        event.preventDefault();
-        cut();
-      }
-
-      // Paste: Cmd/Ctrl + V
-      if (isModifier && event.key === "v") {
-        event.preventDefault();
-        paste();
-      }
-
-      // Delete: Delete or Backspace (without modifier)
-      if (
-        !isModifier &&
-        (event.key === "Delete" || event.key === "Backspace")
-      ) {
-        // Only handle if not typing in an input field
-        const target = event.target as HTMLElement;
-        if (target.tagName !== "INPUT" && target.tagName !== "TEXTAREA") {
-          event.preventDefault();
-          deleteSelected();
-        }
-      }
-
-      // Rotate: R (clockwise) or Shift+R (counterclockwise)
-      if (!isModifier && (event.key === "r" || event.key === "R")) {
-        const target = event.target as HTMLElement;
-        if (target.tagName !== "INPUT" && target.tagName !== "TEXTAREA") {
-          event.preventDefault();
-          if (event.shiftKey) {
-            rotateSelected(-90);
-          } else {
-            rotateSelected(90);
-          }
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [copy, cut, paste, deleteSelected, rotateSelected]);
-
-  const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const isDuplicateDragRef = useRef(false);
   const { screenToFlowPosition } = useReactFlow();
 
@@ -369,87 +224,12 @@ function ReactFlowContent() {
     [screenToFlowPosition, nodes, setNodes, takeSnapshot],
   );
 
-  return (
-    <ContextMenu>
-      <ContextMenuTrigger asChild>
-        <div ref={reactFlowWrapper} className="h-full w-full">
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            nodeTypes={nodeTypes}
-            defaultEdgeOptions={defaultEdgeOptions}
-            connectionLineStyle={connectionLineStyle}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onNodeDragStart={onNodeDragStart}
-            onDrop={onDrop}
-            onDragOver={onDragOver}
-            fitViewOptions={fitViewOptions}
-            colorMode={theme}
-          >
-            <Background />
-            <Controls />
-          </ReactFlow>
-        </div>
-      </ContextMenuTrigger>
-      <ContextMenuContent className="w-48">
-        <ContextMenuItem onClick={cut} disabled={!hasSelection}>
-          <Scissors className="mr-2 h-4 w-4" />
-          Cut
-          <ContextMenuShortcut>{isMac ? "⌘X" : "Ctrl+X"}</ContextMenuShortcut>
-        </ContextMenuItem>
-        <ContextMenuItem onClick={copy} disabled={!hasSelection}>
-          <ClipboardCopy className="mr-2 h-4 w-4" />
-          Copy
-          <ContextMenuShortcut>{isMac ? "⌘C" : "Ctrl+C"}</ContextMenuShortcut>
-        </ContextMenuItem>
-        <ContextMenuItem onClick={paste} disabled={!hasClipboard}>
-          <Clipboard className="mr-2 h-4 w-4" />
-          Paste
-          <ContextMenuShortcut>{isMac ? "⌘V" : "Ctrl+V"}</ContextMenuShortcut>
-        </ContextMenuItem>
-        <ContextMenuSeparator />
-        <ContextMenuItem
-          onClick={() => rotateSelected(90)}
-          disabled={!hasSelection}
-        >
-          <RotateCw className="mr-2 h-4 w-4" />
-          Rotate Clockwise
-          <ContextMenuShortcut>R</ContextMenuShortcut>
-        </ContextMenuItem>
-        <ContextMenuItem
-          onClick={() => rotateSelected(-90)}
-          disabled={!hasSelection}
-        >
-          <RotateCcw className="mr-2 h-4 w-4" />
-          Rotate Counterclockwise
-          <ContextMenuShortcut>⇧R</ContextMenuShortcut>
-        </ContextMenuItem>
-        <ContextMenuSeparator />
-        <ContextMenuItem onClick={() => autoLayout()} disabled={!canLayout}>
-          <AlignStartVertical className="mr-2 h-4 w-4" />
-          Auto Layout
-        </ContextMenuItem>
-        <ContextMenuSeparator />
-        <ContextMenuItem
-          onClick={deleteSelected}
-          disabled={!hasSelection}
-          variant="destructive"
-        >
-          <Trash2 className="mr-2 h-4 w-4" />
-          Delete
-          <ContextMenuShortcut>{isMac ? "⌫" : "Del"}</ContextMenuShortcut>
-        </ContextMenuItem>
-      </ContextMenuContent>
-    </ContextMenu>
-  );
-}
-
-export function ReactFlowWindow() {
-  return (
-    <ReactFlowProvider>
-      <ReactFlowContent />
-    </ReactFlowProvider>
-  );
+  return {
+    onNodesChange,
+    onEdgesChange,
+    onConnect,
+    onNodeDragStart,
+    onDragOver,
+    onDrop,
+  };
 }
