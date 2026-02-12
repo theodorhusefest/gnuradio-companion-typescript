@@ -1,5 +1,6 @@
 import { BlocksWindow } from "@/components/BlocksWindow";
 import Canvas from "@/components/Canvas";
+import { CommandPalette } from "@/components/CommandPalette";
 import { DetailsWindow } from "@/components/DetailsWindow";
 import Toolbar from "@/components/Toolbar";
 import {
@@ -51,6 +52,7 @@ function App() {
   }, [undo, redo]);
   return (
     <div className="h-screen w-screen flex flex-col">
+      <CommandPalette />
       <Toolbar />
       <div className="flex-1 overflow-hidden">
         <ResizablePanelGroup direction="horizontal">

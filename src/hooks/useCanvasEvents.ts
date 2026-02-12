@@ -1,9 +1,10 @@
 import type { GnuRadioBlock } from "@/blocks/types";
+import { createBlockNode } from "@/lib/blockUtils";
 import { duplicateNodes } from "@/lib/duplicateNodes";
 import { getEdgeColorFromDTypes, getPortDTypeFromNode } from "@/lib/portUtils";
 import { useGraphStore } from "@/stores/graphStore";
 import { useTemporalActions } from "@/stores/useTemporalStore";
-import type { BlockInstanceData, GraphEdge, GraphNode } from "@/types/graph";
+import type { GraphEdge, GraphNode } from "@/types/graph";
 import {
   applyEdgeChanges,
   applyNodeChanges,
@@ -15,9 +16,6 @@ import {
   type OnNodesChange,
 } from "@xyflow/react";
 import { useCallback, useRef, type DragEvent } from "react";
-
-let nodeId = 0;
-const getNodeId = () => `node_${nodeId++}`;
 
 export function useCanvasEvents() {
   const nodes = useGraphStore((state) => state.nodes);
@@ -186,34 +184,7 @@ export function useCanvasEvents() {
         y: event.clientY,
       });
 
-      // Create new node with proper GraphNode structure
-      const nodeIdValue = getNodeId();
-
-      // Initialize parameters with default values from block definition
-      const initialParameters: Record<string, string | number | boolean> = {};
-      block.parameters?.forEach((param) => {
-        if (param.default !== undefined) {
-          initialParameters[param.id] = param.default;
-        }
-      });
-
-      const instanceData: BlockInstanceData = {
-        blockDefinition: block,
-        parameters: initialParameters,
-        instanceName: nodeIdValue,
-        enabled: true,
-        bus_sink: false,
-        bus_source: false,
-        bus_structure: null,
-        rotation: 0,
-      };
-
-      const newNode: GraphNode = {
-        id: nodeIdValue,
-        type: "block",
-        position,
-        data: instanceData,
-      };
+      const newNode = createBlockNode(block, position);
 
       // Take snapshot before adding node (captures state without this node)
       takeSnapshot();
