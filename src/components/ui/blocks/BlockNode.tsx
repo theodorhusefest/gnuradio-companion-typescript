@@ -5,6 +5,7 @@ import {
   getShouldShowPorts,
 } from "@/lib/blockUtils";
 import { getPorts } from "@/lib/portUtils";
+import { cn } from "@/lib/utils";
 import { useGraphStore } from "@/stores/graphStore";
 import { useTemporalActions } from "@/stores/useTemporalStore";
 import type { GraphNode } from "@/types/graph";
@@ -34,7 +35,7 @@ const getHandlePositions = (
   }
 };
 
-const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
+const BlockNode = ({ data, id, selected }: NodeProps<GraphNode>) => {
   const blockDefinition = data.blockDefinition;
   const label = blockDefinition.label;
   const rotation = data.rotation || 0;
@@ -98,7 +99,10 @@ const BlockNode = ({ data, id }: NodeProps<GraphNode>) => {
   return (
     <>
       <div
-        className="px-4 py-2 rounded-lg border-2 min-w-[150px] shadow-sm bg-card shadow-foreground/10"
+        className={cn(
+          "px-4 py-2 rounded-lg border-2 min-w-[150px] shadow-sm bg-card",
+          selected && "border-foreground",
+        )}
         style={{
           opacity: isDeprecated ? 0.6 : 1,
           minHeight: minimumNodeHeight,

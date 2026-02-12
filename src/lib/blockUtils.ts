@@ -1,4 +1,6 @@
+import type { GnuRadioBlock } from "@/blocks/types";
 import type { BlockParameter } from "@/types/blocks";
+import type { BlockInstanceData, GraphNode } from "@/types/graph";
 
 /**
  * Builds a parameter list with current values merged with defaults
@@ -51,4 +53,49 @@ export function calculateNodeHeight(
   portHeight = 40,
 ): number {
   return baseHeight + portHeight * Math.max(inputCount, outputCount);
+}
+
+let nodeIdCounter = 0;
+
+/**
+ * Generates a unique node ID
+ */
+export function getNextNodeId(): string {
+  return `node_${nodeIdCounter++}`;
+}
+
+/**
+ * Creates a GraphNode from a block definition and position.
+ * Initializes parameters with default values from the block definition.
+ */
+export function createBlockNode(
+  block: GnuRadioBlock,
+  position: { x: number; y: number },
+): GraphNode {
+  const nodeId = getNextNodeId();
+
+  const initialParameters: Record<string, string | number | boolean> = {};
+  block.parameters?.forEach((param) => {
+    if (param.default !== undefined) {
+      initialParameters[param.id] = param.default;
+    }
+  });
+
+  const instanceData: BlockInstanceData = {
+    blockDefinition: block,
+    parameters: initialParameters,
+    instanceName: nodeId,
+    enabled: true,
+    bus_sink: false,
+    bus_source: false,
+    bus_structure: null,
+    rotation: 0,
+  };
+
+  return {
+    id: nodeId,
+    type: "block",
+    position,
+    data: instanceData,
+  };
 }
