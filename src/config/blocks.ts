@@ -5,7 +5,7 @@
  * Set VITE_BLOCK_SOURCE to "http" to fetch from API, or "local" (default) for blocks.json
  */
 
-export type BlockSource = "local" | "http";
+export type BlockSource = "local" | "http" | "wasm";
 
 export const BLOCK_SOURCE: BlockSource =
   (import.meta.env.VITE_BLOCK_SOURCE as BlockSource) || "local";
@@ -15,3 +15,4 @@ export const BLOCKS_API_URL: string =
 
 export const isHttpSource = (): boolean => BLOCK_SOURCE === "http";
 export const isLocalSource = (): boolean => BLOCK_SOURCE === "local";
+export const isWASMSource = (): boolean => BLOCK_SOURCE === "wasm";
