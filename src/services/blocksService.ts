@@ -5,7 +5,13 @@
  */
 
 import type { BlocksData } from "@/types/blocks";
-import { BLOCK_SOURCE, BLOCKS_API_URL, isHttpSource } from "@/config/blocks";
+import {
+  BLOCK_SOURCE,
+  BLOCKS_API_URL,
+  isHttpSource,
+  isWASMSource,
+} from "@/config/blocks";
+import { Module } from "@/backend.js";
 
 export type FetchBlocksResult =
   | { success: true; data: BlocksData }
@@ -70,6 +76,13 @@ async function fetchHttpBlocks(): Promise<FetchBlocksResult> {
   }
 }
 
+async function fetchWASMBlocks(): Promise<FetchBlocksResult> {
+  await new Promise((r) => setTimeout(r, 2000)); // TODO: Use onRuntimeInitialized()
+  const data: BlocksData = JSON.parse(Module.blocks());
+  console.log("Fetched WASM");
+  return { success: true, data };
+}
+
 /**
  * Fetch blocks based on configured source
  */
@@ -79,6 +92,9 @@ export async function fetchBlocks(): Promise<FetchBlocksResult> {
   if (isHttpSource()) {
     console.log(`[BlocksService] Using HTTP endpoint: ${BLOCKS_API_URL}`);
     return fetchHttpBlocks();
+  } else if (isWASMSource()) {
+    console.log(`[BlocksService] Using WASM backend`);
+    return fetchWASMBlocks();
   }
 
   return fetchLocalBlocks();
