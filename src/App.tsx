@@ -1,6 +1,7 @@
 import { BlocksWindow } from "@/components/BlocksWindow";
+import Canvas from "@/components/Canvas";
+import { CommandPalette } from "@/components/CommandPalette";
 import { DetailsWindow } from "@/components/DetailsWindow";
-import { ReactFlowWindow } from "@/components/ReactFlowWindow";
 import Toolbar from "@/components/Toolbar";
 import {
   ResizableHandle,
@@ -51,13 +52,14 @@ function App() {
   }, [undo, redo]);
   return (
     <div className="h-screen w-screen flex flex-col">
+      <CommandPalette />
       <Toolbar />
       <div className="flex-1 overflow-hidden">
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel defaultSize={75} minSize={30}>
             <ResizablePanelGroup direction="vertical">
               <ResizablePanel defaultSize={70} minSize={30}>
-                <ReactFlowWindow />
+                <Canvas />
               </ResizablePanel>
               <ResizableHandle withHandle />
               <ResizablePanel defaultSize={30} minSize={20}>
