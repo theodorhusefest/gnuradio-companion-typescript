@@ -1,3 +1,4 @@
+import ExecutionButtons from "./Toolbar/ExecutionButtons";
 import LayoutButtons from "./Toolbar/LayoutButtons";
 import ModeToggle from "./Toolbar/ModeToggle";
 import RotationButtons from "./Toolbar/RotationButtons";
@@ -12,6 +13,7 @@ const Toolbar = () => {
           <UndoRedoButtons />
           <RotationButtons />
           <LayoutButtons />
+          <ExecutionButtons />
         </div>
       </div>
       <ModeToggle />
