@@ -26,7 +26,21 @@
     "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron dist-electron/main.js\"",
     "electron:build": "pnpm run electron:compile && pnpm run build && electron-builder",
     "electron:compile": "tsc -p tsconfig.electron.json",
-    "check": "pnpm tsc && pnpm lint && pnpm test && pnpm test:e2e"
+    "check": "pnpm tsc && pnpm lint && pnpm test && pnpm test:e2e",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{js,mjs,cjs}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,css,html,yaml,yml}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@radix-ui/react-collapsible": "^1.1.12",
@@ -74,6 +88,8 @@
     "eslint-plugin-react-refresh": "^0.4.22",
     "globals": "^16.4.0",
     "happy-dom": "^20.0.10",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.3.0",
     "shadcn": "^3.5.0",

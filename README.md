@@ -31,6 +31,8 @@ pnpm run dev
 
 The app will automatically parse GNU Radio blocks on startup.
 
+Git hooks are set up automatically via `pnpm install`. Pre-commit hooks run Prettier and ESLint on staged files.
+
 ### Build
 
 ```bash
