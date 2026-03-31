@@ -4,14 +4,14 @@
  * Service for fetching GNU Radio blocks from various sources
  */
 
-import type { BlocksData } from "@/types/blocks";
+import { Module } from "@/backend.js";
 import {
   BLOCK_SOURCE,
   BLOCKS_API_URL,
   isHttpSource,
   isWASMSource,
 } from "@/config/blocks";
-import { Module } from "@/backend.js";
+import type { BlocksData } from "@/types/blocks";
 
 export type FetchBlocksResult =
   | { success: true; data: BlocksData }

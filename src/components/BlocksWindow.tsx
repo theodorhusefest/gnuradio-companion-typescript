@@ -7,13 +7,13 @@ import {
 } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronRight, Search, AlertCircle, Loader2 } from "lucide-react";
-import { useMemo, useState, useEffect } from "react";
 import {
-  useBlocksStore,
-  useBlocksStatus,
   useBlocks,
+  useBlocksStatus,
+  useBlocksStore,
 } from "@/stores/blocksStore";
+import { AlertCircle, ChevronRight, Loader2, Search } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 const blocks = blocksData as BlocksData;
 
@@ -207,7 +207,9 @@ export function BlocksWindow() {
   }
 
   if (status === "error") {
-    return <BlocksError error={error || "Unknown error"} onRetry={handleRetry} />;
+    return (
+      <BlocksError error={error || "Unknown error"} onRetry={handleRetry} />
+    );
   }
 
   return <BlocksContent />;

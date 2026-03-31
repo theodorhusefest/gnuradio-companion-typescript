@@ -5,13 +5,13 @@
  * Supports both local (blocks.json) and HTTP-based block sources.
  */
 
-import { create } from "zustand";
+import { fetchBlocks, getBlockSourceInfo } from "@/services/blocksService";
 import type {
+  BlocksByCategory,
   BlocksData,
   GnuRadioBlock,
-  BlocksByCategory,
 } from "@/types/blocks";
-import { fetchBlocks, getBlockSourceInfo } from "@/services/blocksService";
+import { create } from "zustand";
 
 export type BlocksStatus = "idle" | "loading" | "success" | "error";
 
@@ -127,6 +127,6 @@ export const useBlocks = () => {
  */
 export const useBlockById = (blockId: string): GnuRadioBlock | undefined => {
   return useBlocksStore((state) =>
-    state.blocks.find((block) => block.id === blockId)
+    state.blocks.find((block) => block.id === blockId),
   );
 };
