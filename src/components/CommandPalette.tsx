@@ -17,9 +17,10 @@ import { useEffect, useState } from "react";
 
 const blocks = blocksData as BlocksData;
 
+const CASCADE_OFFSET = 30;
+
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
-  const nodes = useGraphStore((state) => state.nodes);
   const setNodes = useGraphStore((state) => state.setNodes);
   const { takeSnapshot } = useTemporalActions();
 
@@ -35,9 +36,14 @@ export function CommandPalette() {
   }, []);
 
   const handleSelectBlock = (block: GnuRadioBlock) => {
-    const newNode = createBlockNode(block, { x: 200, y: 200 });
+    const currentNodes = useGraphStore.getState().nodes;
+    const offset = currentNodes.length * CASCADE_OFFSET;
+    const newNode = createBlockNode(block, {
+      x: 200 + offset,
+      y: 200 + offset,
+    });
     takeSnapshot();
-    setNodes([...nodes, newNode]);
+    setNodes([...currentNodes, newNode]);
     setOpen(false);
   };
 
@@ -47,21 +53,11 @@ export function CommandPalette() {
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup heading="Actions">
-          <CommandItem
-            onSelect={() => {
-              console.log("Save");
-              setOpen(false);
-            }}
-          >
+          <CommandItem onSelect={() => setOpen(false)}>
             <Save className="mr-2 h-4 w-4" />
             Save
           </CommandItem>
-          <CommandItem
-            onSelect={() => {
-              console.log("Open");
-              setOpen(false);
-            }}
-          >
+          <CommandItem onSelect={() => setOpen(false)}>
             <FolderOpen className="mr-2 h-4 w-4" />
             Open
           </CommandItem>
