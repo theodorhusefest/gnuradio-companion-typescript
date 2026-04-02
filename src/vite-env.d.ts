@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_BLOCK_SOURCE?: "local" | "http";
+  readonly VITE_BLOCK_SOURCE?: "http" | "wasm";
   readonly VITE_BLOCKS_API_URL?: string;
 }
 
