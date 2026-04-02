@@ -39,7 +39,6 @@ async function fetchLocalBlocks(): Promise<FetchBlocksResult> {
  * Fetch blocks from HTTP API endpoint
  */
 async function fetchHttpBlocks(): Promise<FetchBlocksResult> {
-  console.log(BLOCKS_API_URL);
   try {
     const response = await fetch(BLOCKS_API_URL, {
       method: "POST",
