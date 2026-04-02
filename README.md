@@ -33,6 +33,11 @@ The app will automatically parse GNU Radio blocks on startup.
 
 Git hooks are set up automatically via `pnpm install`. Pre-commit hooks run Prettier and ESLint on staged files.
 
+Note: If you get the following error, chances are that some new dependencies have been added and you will have to re-run `pnpm install`.
+```bash
+5:47:47 PM [vite] Internal server error: Failed to resolve import (...) from "src/components/ui/(...).tsx". Does the file exist?
+```
+
 ### Build
 
 ```bash
