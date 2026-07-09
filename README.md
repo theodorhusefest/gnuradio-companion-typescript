@@ -2,7 +2,6 @@
 
 A modern web-based companion application for GNU Radio 4 built with React, TypeScript, and Vite. Note that this is still a very early development build, so many features are still missing and things may break without notice.
 
-
 ## Features
 
 - **Blocks imported from GR4**: Blocks are imported from GNU Radio 4 via HTTP or a WASM-compiled backend
@@ -28,6 +27,7 @@ pnpm install
 
 
 #### HTTP loading
+For the HTTP mode, the frontend will query the GR4 backend over HTTP (port 8080).
 
 First, run the backend:
 ```bash
@@ -37,9 +37,12 @@ Next, start the frontend:
 ```bash
 VITE_BLOCK_SOURCE=http pnpm run dev
 ```
-
+The code for the backend is available here:
+https://github.com/haakov/gr4-playground
 
 #### WASM loading
+For the WASM mode, the backend has already been compiled to WASM (see the backend.wasm file), and there is no need to run it separately. The web application will automatically load it into the browser.
+
 ```bash
 VITE_BLOCK_SOURCE=wasm pnpm run dev
 ```
