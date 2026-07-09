@@ -1,6 +1,6 @@
 # GNU Radio 4 GUI - TypeScript Edition
 
-A modern web-based companion application for GNU Radio 4 built with React, TypeScript, and Vite. Try it out at [https://haakov.github.io/gr4_gui/](https://haakov.github.io/gr4_gui/). Note that this is still a very early development build, so many features are still missing and things may break without notice.
+A modern web-based companion application for GNU Radio 4 built with React, TypeScript, and Vite. Note that this is still a very early development build, so many features are still missing and things may break without notice.
 
 
 ## Features
