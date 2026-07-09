@@ -1,6 +1,8 @@
+import ExecutionButtons from "./Toolbar/ExecutionButtons";
 import LayoutButtons from "./Toolbar/LayoutButtons";
 import ModeToggle from "./Toolbar/ModeToggle";
 import RotationButtons from "./Toolbar/RotationButtons";
+import SchedulerDropdown from "./Toolbar/SchedulerDropdown";
 import UndoRedoButtons from "./Toolbar/UndoRedoButtons";
 
 const Toolbar = () => {
@@ -12,9 +14,13 @@ const Toolbar = () => {
           <UndoRedoButtons />
           <RotationButtons />
           <LayoutButtons />
+          <ExecutionButtons />
         </div>
       </div>
-      <ModeToggle />
+      <div className="flex items-center gap-2">
+        <SchedulerDropdown />
+        <ModeToggle />
+      </div>
     </div>
   );
 };

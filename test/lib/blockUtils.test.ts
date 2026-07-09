@@ -2,10 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   buildParametersWithValues,
   calculateNodeHeight,
+  createBlockNode,
   getPortDType,
   getShouldShowPorts,
 } from "../../src/lib/blockUtils";
-import type { BlockParameter } from "../../src/types/blocks";
+import type { BlockParameter, GnuRadioBlock } from "../../src/types/blocks";
 
 describe("blockUtils", () => {
   describe("buildParametersWithValues", () => {
@@ -144,6 +145,67 @@ describe("blockUtils", () => {
     it("should use custom base height and port height", () => {
       const result = calculateNodeHeight(2, 1, 50, 30);
       expect(result).toBe(50 + 30 * 2);
+    });
+  });
+
+  describe("createBlockNode", () => {
+    const mockBlock: GnuRadioBlock = {
+      id: "blocks_add_xx",
+      label: "Add",
+      category: "Math Operators",
+      parameters: [
+        { id: "type", label: "Type", dtype: "enum", default: "complex" },
+        { id: "num_inputs", label: "Num Inputs", dtype: "int", default: 2 },
+      ],
+      inputs: [{ domain: "stream", dtype: "complex" }],
+      outputs: [{ domain: "stream", dtype: "complex" }],
+    };
+
+    it("should create a node with correct structure", () => {
+      const node = createBlockNode(mockBlock, { x: 100, y: 200 });
+
+      expect(node.id).toMatch(/^node_\d+$/);
+      expect(node.type).toBe("block");
+      expect(node.position).toEqual({ x: 100, y: 200 });
+    });
+
+    it("should initialize parameters with defaults", () => {
+      const node = createBlockNode(mockBlock, { x: 0, y: 0 });
+
+      expect(node.data.parameters).toEqual({
+        type: "complex",
+        num_inputs: 2,
+      });
+    });
+
+    it("should set instance data fields correctly", () => {
+      const node = createBlockNode(mockBlock, { x: 0, y: 0 });
+
+      expect(node.data.blockDefinition).toBe(mockBlock);
+      expect(node.data.instanceName).toBe(node.id);
+      expect(node.data.enabled).toBe(true);
+      expect(node.data.rotation).toBe(0);
+      expect(node.data.bus_sink).toBe(false);
+      expect(node.data.bus_source).toBe(false);
+      expect(node.data.bus_structure).toBeNull();
+    });
+
+    it("should handle blocks with no parameters", () => {
+      const blockNoParams: GnuRadioBlock = {
+        id: "blocks_null_sink",
+        label: "Null Sink",
+      };
+
+      const node = createBlockNode(blockNoParams, { x: 50, y: 50 });
+
+      expect(node.data.parameters).toEqual({});
+    });
+
+    it("should generate unique IDs for each node", () => {
+      const node1 = createBlockNode(mockBlock, { x: 0, y: 0 });
+      const node2 = createBlockNode(mockBlock, { x: 0, y: 0 });
+
+      expect(node1.id).not.toBe(node2.id);
     });
   });
 });
