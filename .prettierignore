@@ -4,3 +4,4 @@ coverage
 pnpm-lock.yaml
 *.md
 src/blocks/**
+src/backend.js
