@@ -16,7 +16,6 @@ A modern web-based companion application for GNU Radio 4 built with React, TypeS
 ### Prerequisites
 
 - Node.js 18+ with pnpm
-- Optional: GNU Radio 4 installed locally (for the HTTP block loading)
 - Git LFS
 
 ### Installation
@@ -27,13 +26,20 @@ pnpm install
 
 ### Development
 
-HTTP loading (default, requires running GR4 backend):
+
+#### HTTP loading
+
+First, run the backend:
 ```bash
-pnpm run dev
+docker run -it -p 8080:8080 ghcr.io/haakov/gr4-playground:latest /code/build/main
+```
+Next, start the frontend:
+```bash
+VITE_BLOCK_SOURCE=http pnpm run dev
 ```
 
 
-WASM loading:
+#### WASM loading
 ```bash
 VITE_BLOCK_SOURCE=wasm pnpm run dev
 ```
